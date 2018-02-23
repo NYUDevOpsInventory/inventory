@@ -5,9 +5,11 @@ Inverntory Management System Server
 import os
 # import sys
 # import logging
-from flask import Flask, jsonify
-# from flask import Response, request, json, url_for, make_response
-from models import DataValidationError
+from flask import Flask, jsonify, url_for, make_response, request
+# from flask_sqlalchemy import SQLAlchemy
+# from flask import Response, json
+from models import DataValidationError, Entry
+from werkzeug.exceptions import NotFound
 
 # Pull options from environment
 DEBUG = (os.getenv('DEBUG', 'False') == 'True')
@@ -15,6 +17,7 @@ PORT = os.getenv('PORT', '5000')
 
 # Create Flask application
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URL'] = 'sqlite:////tmp/test.db'
 
 # Status Codes
 HTTP_200_OK = 200
@@ -66,13 +69,49 @@ def index():
 @app.route('/inventory', methods=['GET'])
 def list_inventory():
     """ Return all entries in the Inventory system """
-    return jsonify(message='List all inventory API'), HTTP_200_OK
+    results = [entry.serialize() for entry in Entry.list_all()]
+    return jsonify(results), HTTP_200_OK
 
-@app.route('/inventory/<int:entry_id>', methods=['GET'])
-def get_entry(entry_id):
-    """ Return entry identified by entry_id """
-    message = {'message' : 'GET request for entry %s' % str(entry_id)}
-    return jsonify(message), HTTP_200_OK
+@app.route('/inventory/<int:prod_id>', methods=['GET'])
+def get_entry(prod_id):
+    """ Return entry identified by prod_id """
+    entry = Entry.find(prod_id)
+    if not entry:
+        raise NotFound("Product with id '{}' was not found in Inventory".format(prod_id))
+    return jsonify(entry.serialize()), HTTP_200_OK
+
+@app.route('/inventory', methods=['POST'])
+def create_entry():
+    """
+    Creates an Inventory entry
+    This endpoint will create an entry based the data in the body that is posted
+    """
+    check_content_type('application/json')
+    entry = Entry()
+    entry.deserialize(request.get_json())
+    entry.save()
+    message = entry.serialize()
+    location_url = url_for('get_entry', prod_id=entry.prod_id, _external=True)
+    return make_response(jsonify(message), HTTP_201_CREATED,
+                         {
+                             'Location': location_url
+                         })
+
+######################################################################
+#  U T I L I T Y   F U N C T I O N S
+######################################################################
+
+def init_db():
+    """ Initialies the SQLAlchemy app """
+    global app
+    Entry.init_db(app)
+
+def check_content_type(content_type):
+    """ Checks that the media type is correct """
+    if request.headers['Content-Type'] == content_type:
+        return
+    app.logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
+    abort(415, 'Content-Type must be {}'.format(content_type))
 
 ######################################################################
 #   M A I N
@@ -81,4 +120,5 @@ if __name__ == "__main__":
     print("**********************************")
     print("   INVENTORY MANAGEMENT SERVICE   ")
     print("**********************************")
+    init_db()  # make our sqlalchemy tables
     app.run(host='0.0.0.0', port=int(PORT), debug=DEBUG)
