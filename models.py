@@ -79,8 +79,6 @@ class Entry(db.Model):
     def deserialize(self, data, initialize_property=True):
         """
         Deserializes an Entry from a dictionary.
-        Currently only prod_id is deserialized.
-        Deserialization of other properties are on the way.
 
         Args:
             data (dict): A dictionary containing the Entry data
