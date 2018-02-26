@@ -8,7 +8,7 @@ import os
 from flask import Flask, jsonify, url_for, make_response, request
 # from flask_sqlalchemy import SQLAlchemy
 # from flask import Response, json
-from models import DataValidationError, Entry
+from models import DataValidationError, ProductInformation
 from werkzeug.exceptions import NotFound
 
 # Pull options from environment
@@ -69,29 +69,29 @@ def index():
 @app.route('/inventory', methods=['GET'])
 def list_inventory():
     """ Return all entries in the Inventory system """
-    results = [entry.serialize() for entry in Entry.list_all()]
+    results = [prod_info.serialize() for prod_info in ProductInformation.list_all()]
     return jsonify(results), HTTP_200_OK
 
 @app.route('/inventory/<int:prod_id>', methods=['GET'])
-def get_entry(prod_id):
-    """ Return entry identified by prod_id """
-    entry = Entry.find(prod_id)
-    if not entry:
+def get_prod_info(prod_id):
+    """ Return ProductInformation identified by prod_id """
+    prod_info = ProductInformation.find(prod_id)
+    if not prod_info:
         raise NotFound("Product with id '{}' was not found in Inventory".format(prod_id))
-    return jsonify(entry.serialize()), HTTP_200_OK
+    return jsonify(prod_info.serialize()), HTTP_200_OK
 
 @app.route('/inventory', methods=['POST'])
-def create_entry():
+def create_prod_info():
     """
-    Creates an Inventory entry
-    This endpoint will create an entry based the data in the body that is posted
+    Creates a ProductInformation
+    This endpoint will create a ProductInformation based the data in the body that is posted
     """
     check_content_type('application/json')
-    entry = Entry()
-    entry.deserialize(request.get_json())
-    entry.save()
-    message = entry.serialize()
-    location_url = url_for('get_entry', prod_id=entry.prod_id, _external=True)
+    prod_info = ProductInformation()
+    prod_info.deserialize(request.get_json())
+    prod_info.save()
+    message = prod_info.serialize()
+    location_url = url_for('get_prod_info', prod_id=prod_info.prod_id, _external=True)
     return make_response(jsonify(message), HTTP_201_CREATED,
                          {
                              'Location': location_url
@@ -104,7 +104,7 @@ def create_entry():
 def init_db():
     """ Initialies the SQLAlchemy app """
     global app
-    Entry.init_db(app)
+    ProductInformation.init_db(app)
 
 def check_content_type(content_type):
     """ Checks that the media type is correct """

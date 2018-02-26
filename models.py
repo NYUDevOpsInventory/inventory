@@ -5,7 +5,7 @@ All of the models are stored in this module
 
 Models
 ------
-Entry - An Inventory Entry used in the service
+ProductInformation - An Inventory entry used in the service
 
 Attributes:
 -----------
@@ -24,13 +24,28 @@ restock_amt     (int)       - the amount of new products restocked
 # import threading
 from flask_sqlalchemy import SQLAlchemy
 
+# Default ProductInformation property value
+DEFAULT_NEW_QTY = 0
+DEFAULT_USED_QTY = 0
+DEFAULT_OPEN_BOXED_QTY = 0
+DEFAULT_RESTOCK_LEVEL = -1  # -1 means the product won't restock automatically
+DEFALUT_RESTOCK_AMT = -1    # -1 means the product won't restock automatically
+
+PROD_ID = 'prod_id'
+PROD_NAME = 'prod_name'
+NEW_QTY = 'new_qty'
+USED_QTY = 'used_qty'
+OPEN_BOXED_QTY = 'open_boxed_qty'
+RESTOCK_LEVEL = 'restock_level'
+RESTOCK_AMT = 'restock_amt'
+
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
     pass
 
 db = SQLAlchemy()
 
-class Entry(db.Model):
+class ProductInformation(db.Model):
     """ A class representing an Inventory entry"""
 
     app = None
@@ -49,7 +64,7 @@ class Entry(db.Model):
 
     def save(self):
         """
-        Saves an Entry to database,
+        Saves an ProductInformation to database,
         currently no duplicate detection is supported.
         """
         db.session.add(self)
@@ -57,81 +72,81 @@ class Entry(db.Model):
 
     def delete(self):
         """
-        Delete an Entry from database.
+        Delete an ProductInformation from database.
         """
         db.session.delete(self)
         db.session.commit()
 
     def serialize(self):
         """
-        Serialize an Entry into a dictionary.
+        Serialize an ProductInformation into a dictionary.
         """
         return {
-            "prod_id": self.prod_id,
-            "prod_name": self.prod_name,
-            "new_qty": self.new_qty,
-            "used_qty": self.used_qty,
-            "open_boxed_qty": self.open_boxed_qty,
-            "restock_level": self.restock_level,
-            "restock_amt": self.restock_amt
+            PROD_ID: self.prod_id,
+            PROD_NAME: self.prod_name,
+            NEW_QTY: self.new_qty,
+            USED_QTY: self.used_qty,
+            OPEN_BOXED_QTY: self.open_boxed_qty,
+            RESTOCK_LEVEL: self.restock_level,
+            RESTOCK_AMT: self.restock_amt
         }
 
     def deserialize(self, data, initialize_property=True):
         """
-        Deserializes an Entry from a dictionary.
+        Deserializes an ProductInformation from a dictionary.
 
         Args:
-            data (dict): A dictionary containing the Entry data
+            data (dict): A dictionary containing the ProductInformation data
+            initialize_property (bool): A boolean indicating whether to 
+                initialize the ProductInformation properties to default value.
         """
         if not isinstance(data, dict):
-            raise DataValidationError('Invalid Entry: body of request contained bad or no data')
-        # only prod_id is a must-have property
+            raise DataValidationError('Invalid ProductInformation: body of request contained bad or no data')
+        # only prod_id & prod_name is a must-have property
         try:
-            self.prod_id = data['prod_id']
+            self.prod_id = data[PROD_ID]
+            self.prod_name = data[PROD_NAME]
         except KeyError as error:
-            raise DataValidationError('Invalid Entry: missing ' + error.args[0])
+            raise DataValidationError('Invalid ProductInformation: missing ' + error.args[0])
         except TypeError as error:
-            raise DataValidationError('Invalid Entry: body of request contained' \
+            raise DataValidationError('Invalid ProductInformation: body of request contained' \
                                       'bad or no data')
 
-        # populate Entry with data or None
-        self.prod_name = data.get('prod_name')
-        self.new_qty = data.get('new_qty')
-        self.used_qty = data.get('used_qty')
-        self.open_boxed_qty = data.get('open_boxed_qty')
-        self.restock_level = data.get('restock_level')
-        self.restock_amt = data.get('restock_amt')
+        # populate ProductInformation with given data or None
+        self.new_qty = data.get(NEW_QTY)
+        self.used_qty = data.get(USED_QTY)
+        self.open_boxed_qty = data.get(OPEN_BOXED_QTY)
+        self.restock_level = data.get(RESTOCK_LEVEL)
+        self.restock_amt = data.get(RESTOCK_AMT)
 
         if initialize_property:
-            if self.prod_name is None:
-                self.prod_name = 'default_prod_name'
             if self.new_qty is None:
-                self.new_qty = 5
+                self.new_qty = DEFAULT_NEW_QTY
             if self.used_qty is None:
-                self.used_qty = 0
+                self.used_qty = DEFAULT_USED_QTY
             if self.open_boxed_qty is None:
-                self.open_boxed_qty = 0
+                self.open_boxed_qty = DEFAULT_OPEN_BOXED_QTY
             if self.restock_level is None:
-                self.restock_level = 5
+                self.restock_level = DEFAULT_RESTOCK_LEVEL
             if self.restock_amt is None:
-                self.restock_amt = 20
+                self.restock_amt = DEFALUT_RESTOCK_AMT
 
         return self
 
     @staticmethod
     def init_db(app):
         """ Initialize database """
-        Entry.app = app
+        ProductInformation.app = app
         db.init_app(app)
         app.app_context().push()
         db.create_all()
 
     @staticmethod
-    def list_all():
-        """ Returns all Entry in the database """
-        return Entry.query.all()
+    def find(prod_id):
+        """ Find an ProductInformation by the prod_id """
+        return ProductInformation.query.get(prod_id)
 
     @staticmethod
-    def find(prod_id):
-        """ Find an Entry by the prod_id """
-        return Entry.query.get(prod_id)
+    def list_all():
+        """ Returns all ProductInformation in the database """
+        return ProductInformation.query.all()
