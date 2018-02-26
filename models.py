@@ -29,7 +29,7 @@ DEFAULT_NEW_QTY = 0
 DEFAULT_USED_QTY = 0
 DEFAULT_OPEN_BOXED_QTY = 0
 DEFAULT_RESTOCK_LEVEL = -1  # -1 means the product won't restock automatically
-DEFALUT_RESTOCK_AMT = -1    # -1 means the product won't restock automatically
+DEFALUT_RESTOCK_AMT = 0
 
 PROD_ID = 'prod_id'
 PROD_NAME = 'prod_name'
