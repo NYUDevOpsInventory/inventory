@@ -46,12 +46,17 @@ Vagrant.configure(2) do |config|
     config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/id_rsa.pub"
   end
 
+  # Change the permission of files and directories
+  # so that nosetests runs without extra arguments.
+  config.vm.synced_folder ".", "/vagrant", mount_options: ["dmode=775,fmode=664"]
+  
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     sudo apt-get update
-    sudo apt-get install -y git python-pip python-dev
+    apt-get install -y git python-pip python-dev build-essential
+    pip install --upgrade pip    
     sudo apt-get -y autoremove
     # Install app dependencies
     cd /vagrant
