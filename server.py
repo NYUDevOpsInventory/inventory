@@ -135,6 +135,18 @@ def create_prod_info():
                 LOCATION: location_url
             })
 
+@app.route(PATH_INVENTORY_PROD_ID, methods=[DELETE])
+def delete_prod_info(prod_id):
+    """
+    Deletes a ProductInformation
+    This endpoint will delete a ProductInformation based on the prod_id specified in the path.
+    Should always return 200OK.
+    """
+    prod_info = ProductInformation.find(prod_id)
+    if prod_info:
+        prod_info.delete()
+    return make_response('Product information deleted.', status.HTTP_200_OK)
+    
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
