@@ -22,6 +22,7 @@ restock_amt     (int)       - the amount of new products restocked
 """
 
 # import threading
+import logging
 from flask_sqlalchemy import SQLAlchemy
 
 # Default ProductInformation property value
@@ -97,7 +98,7 @@ class ProductInformation(db.Model):
 
         Args:
             data (dict): A dictionary containing the ProductInformation data
-            initialize_property (bool): A boolean indicating whether to 
+            initialize_property (bool): A boolean indicating whether to
                 initialize the ProductInformation properties to default value.
         """
         if not isinstance(data, dict):
