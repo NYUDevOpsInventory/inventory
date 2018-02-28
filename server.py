@@ -1,67 +1,88 @@
 """
-Inverntory Management System Server
+Inverntory Management System Service
 """
 
-import os
-# import sys
-# import logging
 from flask import Flask, jsonify, url_for, make_response, request
-# from flask_sqlalchemy import SQLAlchemy
-# from flask import Response, json
+from flask_api import status
 from models import DataValidationError, ProductInformation
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import BadRequest, NotFound
+import os
 
+######################################################################
+#  Fixed Global Variables
+######################################################################
 # Pull options from environment
 DEBUG = (os.getenv('DEBUG', 'False') == 'True')
 PORT = os.getenv('PORT', '5000')
+# HTTP request methods
+DELETE = 'DELETE'
+GET = 'GET'
+POST = 'POST'
+PUT = 'PUT'
+# API paths
+PATH_ROOT = '/'
+PATH_INVENTORY = '/inventory'
+PATH_INVENTORY_PROD_ID = '/inventory/<int:prod_id>'
+# Errors
+BAD_REQUEST_ERROR = 'Bad Request.'
+INTERNAL_SERVER_ERROR = 'Internal Server Error'
+INVALID_CONTENT_TYPE_ERROR = 'Invalid Content-Type: %s'
+METHOD_NOT_ALLOWED_ERROR = 'Method Not Allowed'
+NOT_FOUND_ERROR = 'Not Found.'
+# Messages
+CANNOT_CREATE_MSG = "Product with id '{}' already existed. Cannot create new product " \
+        "information with the same prod_id."
+INVALID_CONTENT_TYPE_MSG = 'Content-Type must be {}'
+METHOD_NOT_ALLOWED_MSG = 'Your request method is not supported.' \
+                   ' Check your HTTP method and try again.'
+NOT_FOUND_MSG = "Product with id '{}' was not found in Inventory"
+# Content type
+CONTENT_TYPE = 'Content-Type'
+JSON = 'application/json'
+# Locations
+GET_PROD_INFO = 'get_prod_info'
+LOCATION = 'Location'
 
 # Create Flask application
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URL'] = 'sqlite:////tmp/test.db'
 
-# Status Codes
-HTTP_200_OK = 200
-HTTP_201_CREATED = 201
-HTTP_204_NO_CONTENT = 204
-HTTP_400_BAD_REQUEST = 400
-HTTP_404_NOT_FOUND = 404
-HTTP_409_CONFLICT = 409
-
 ######################################################################
 # Error Handlers
 ######################################################################
-
 @app.errorhandler(DataValidationError)
 def request_validation_error(error):
     """ Handles all data validation issues from the model """
     return bad_request(error)
 
-@app.errorhandler(400)
+@app.errorhandler(status.HTTP_400_BAD_REQUEST)
 def bad_request(error):
     """ Handles requests that have bad or malformed data """
-    return jsonify(status=400, error='Bad Request', message=error.message), 400
+    return jsonify(status = status.HTTP_400_BAD_REQUEST, error = BAD_REQUEST_ERROR,
+            message = error.message), status.HTTP_400_BAD_REQUEST
 
-@app.errorhandler(404)
+@app.errorhandler(status.HTTP_404_NOT_FOUND)
 def not_found(error):
-    """ Handles Pets that cannot be found """
-    return jsonify(status=404, error='Not Found', message=error.message), 404
+    """ Handles product information that cannot be found """
+    return jsonify(status = status.HTTP_404_NOT_FOUND, error = NOT_FOUND_ERROR,
+            message = error.message), status.HTTP_404_NOT_FOUND
 
-@app.errorhandler(405)
+@app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED)
 def method_not_supported(error):
     """ Handles bad method calls """
-    return jsonify(status=405, error='Method not Allowed',
-                   message='Your request method is not supported.' \
-                   ' Check your HTTP method and try again.'), 405
+    return jsonify(status = status.HTTP_405_METHOD_NOT_ALLOWED, error = METHOD_NOT_ALLOWED_ERROR,
+                   message = METHOD_NOT_ALLOWED_MSG), status.HTTP_405_METHOD_NOT_ALLOWED
 
-@app.errorhandler(500)
+@app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
 def internal_server_error(error):
     """ Handles catostrophic errors """
-    return jsonify(status=500, error='Internal Server Error', message=error.message), 500
+    return jsonify(status = status.HTTP_500_INTERNAL_SERVER_ERROR, error = INTERNAL_SERVER_ERROR,
+            message = error.message), status.HTTP_500_INTERNAL_SERVER_ERROR
 
 ######################################################################
 # API placeholder
 ######################################################################
-@app.route('/')
+@app.route(PATH_ROOT)
 def index():
     """ Return help information about the API """
     return jsonify(
@@ -79,41 +100,44 @@ def index():
         },
     ), HTTP_200_OK
 
-@app.route('/inventory', methods=['GET'])
+@app.route(PATH_INVENTORY, methods=[GET])
 def list_inventory():
     """ Return all entries in the Inventory system """
     results = [prod_info.serialize() for prod_info in ProductInformation.list_all()]
-    return jsonify(results), HTTP_200_OK
+    return jsonify(results), status.HTTP_200_OK
 
-@app.route('/inventory/<int:prod_id>', methods=['GET'])
+@app.route(PATH_INVENTORY_PROD_ID, methods=[GET])
 def get_prod_info(prod_id):
     """ Return ProductInformation identified by prod_id """
     prod_info = ProductInformation.find(prod_id)
     if not prod_info:
-        raise NotFound("Product with id '{}' was not found in Inventory".format(prod_id))
-    return jsonify(prod_info.serialize()), HTTP_200_OK
+        raise NotFound(NOT_FOUND_MSG.format(prod_id))
+    return jsonify(prod_info.serialize()), status.HTTP_200_OK
 
-@app.route('/inventory', methods=['POST'])
+@app.route(PATH_INVENTORY, methods=[POST])
 def create_prod_info():
     """
     Creates a ProductInformation
     This endpoint will create a ProductInformation based the data in the body that is posted
     """
-    check_content_type('application/json')
+    check_content_type(JSON)
     prod_info = ProductInformation()
     prod_info.deserialize(request.get_json())
+
+    if (ProductInformation.find(prod_info.prod_id)):
+        raise BadRequest(CANNOT_CREATE_MSG.format(prod_info.prod_id))
+
     prod_info.save()
     message = prod_info.serialize()
-    location_url = url_for('get_prod_info', prod_id=prod_info.prod_id, _external=True)
-    return make_response(jsonify(message), HTTP_201_CREATED,
-                         {
-                             'Location': location_url
-                         })
+    location_url = url_for(GET_PROD_INFO, prod_id=prod_info.prod_id, _external=True)
+    return make_response(jsonify(message), status.HTTP_201_CREATED,
+            {
+                LOCATION: location_url
+            })
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
-
 def init_db():
     """ Initialies the SQLAlchemy app """
     global app
@@ -121,10 +145,10 @@ def init_db():
 
 def check_content_type(content_type):
     """ Checks that the media type is correct """
-    if request.headers['Content-Type'] == content_type:
+    if request.headers[CONTENT_TYPE] == content_type:
         return
-    app.logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
-    abort(415, 'Content-Type must be {}'.format(content_type))
+    app.logger.error(INVALID_CONTENT_TYPE_ERROR, request.headers[CONTENT_TYPE])
+    abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, INVALID_CONTENT_TYPE_MSG.format(content_type))
 
 ######################################################################
 #   M A I N
