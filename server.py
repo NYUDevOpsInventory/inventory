@@ -137,7 +137,7 @@ def create_prod_info():
     prod_info = ProductInformation()
     prod_info.deserialize(request.get_json())
 
-    if (prod_info.find(prod_info.prod_id)):
+    if (ProductInformation.find(prod_info.prod_id)):
         raise BadRequest(CANNOT_CREATE_MSG.format(prod_info.prod_id))
 
     prod_info.save()
