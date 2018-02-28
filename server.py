@@ -71,7 +71,7 @@ def index():
             'help': 'GET /',
             'list all': 'GET /inventory',
             'read': 'GET /inventory/{prod_id}',
-            'add': 'POST /inventory',
+            'create': 'POST /inventory',
             'update': 'PUT /inventory/{prod_id}',
             'delete': 'DELETE /inventory/{prod_id}',
             'query': 'GET /inventory?{prod_name|quantity|condition=val}',
