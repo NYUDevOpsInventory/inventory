@@ -70,7 +70,7 @@ class TestInventoryServer(unittest.TestCase):
         db.session.remove()
         db.drop_all()
 
-    def test_create_prod_info_BadRequestException(self):
+    def test_create_prod_info_bad_request(self):
         data = json.dumps({})
         response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
@@ -83,68 +83,68 @@ class TestInventoryServer(unittest.TestCase):
         response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
-    def test_create_prod_info_withAllFields(self):
-        entryCount = self.getEntryCount()
+    def test_create_prod_info_with_all_fields(self):
+        entry_count = self.get_entry_count()
 
-        testProdId = 233333
-        testProdName = 'nicai'
-        testNewQty = 1111
-        testUsedQty = 666
-        testOpenQty = 2018
-        testRestockLevel = 9
-        testRestockAmt = 4
-        data = json.dumps({PROD_ID: testProdId, PROD_NAME: testProdName,
-                    NEW_QTY: testNewQty, USED_QTY: testUsedQty, OPEN_BOXED_QTY: testOpenQty,
-                    RESTOCK_LEVEL: testRestockLevel, RESTOCK_AMT: testRestockAmt})
+        test_prod_id = 233333
+        test_prod_name = 'nicai'
+        test_new_qty = 1111
+        test_used_qty = 666
+        test_open_qty = 2018
+        test_restock_level = 9
+        test_restock_amt = 4
+        data = json.dumps({PROD_ID: test_prod_id, PROD_NAME: test_prod_name,
+                    NEW_QTY: test_new_qty, USED_QTY: test_used_qty, OPEN_BOXED_QTY: test_open_qty,
+                    RESTOCK_LEVEL: test_restock_level, RESTOCK_AMT: test_restock_amt})
         response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         self.assertTrue(response.headers.get(LOCATION, None) != None)
-        returnJson = json.loads(response.data)
-        self.assertIsNotNone(returnJson)
-        self.assertFieldsEqual(returnJson, testProdId, testProdName, testNewQty, testUsedQty,
-                testOpenQty, testRestockLevel, testRestockAmt)
+        return_json = json.loads(response.data)
+        self.assertIsNotNone(return_json)
+        self.assert_fields_equal(return_json, test_prod_id, test_prod_name, test_new_qty,
+                test_used_qty, test_open_qty, test_restock_level, test_restock_amt)
         response = self.app.get(PATH_INVENTORY)
         data = json.loads(response.data)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assertEqual(entryCount + 1, len(data))
-        self.assertIn(returnJson, data)
+        self.assertEqual(entry_count + 1, len(data))
+        self.assertIn(return_json, data)
                 
-    def test_create_prod_info_withMandatoryFields(self):
-        entryCount = self.getEntryCount()
+    def test_create_prod_info_with_mandatory_fields(self):
+        entry_count = self.get_entry_count()
 
-        testProdId = 233
-        testProdName = 'bucai'
-        data = json.dumps({PROD_ID: testProdId, PROD_NAME: testProdName})
+        test_prod_id = 233
+        test_prod_name = 'bucai'
+        data = json.dumps({PROD_ID: test_prod_id, PROD_NAME: test_prod_name})
         response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         self.assertTrue(response.headers.get(LOCATION, None) != None)
-        returnJson = json.loads(response.data)
-        self.assertIsNotNone(returnJson)
-        self.assertFieldsEqual(returnJson, testProdId, testProdName, DEFAULT_NEW_QTY,
+        return_json = json.loads(response.data)
+        self.assertIsNotNone(return_json)
+        self.assert_fields_equal(return_json, test_prod_id, test_prod_name, DEFAULT_NEW_QTY,
                 DEFAULT_USED_QTY, DEFAULT_OPEN_BOXED_QTY, DEFAULT_RESTOCK_LEVEL,
                 DEFALUT_RESTOCK_AMT)
         response = self.app.get(PATH_INVENTORY)
         data = json.loads(response.data)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assertEqual(entryCount + 1, len(data))
-        self.assertIn(returnJson, data)
+        self.assertEqual(entry_count + 1, len(data))
+        self.assertIn(return_json, data)
 
 ######################################################################
 # Utility functions
 ######################################################################
-    def assertFieldsEqual(self, returnJson, expectProdId, expectProdName, expectNewQty,
-            expectUsedQty, expectOpenQty, expectRestockLevel, expectRestockAmt):
-        self.assertEqual(expectProdId, returnJson[PROD_ID])
-        self.assertEqual(expectProdName, returnJson[PROD_NAME])
-        self.assertEqual(expectNewQty, returnJson[NEW_QTY])
-        self.assertEqual(expectUsedQty, returnJson[USED_QTY])
-        self.assertEqual(expectOpenQty, returnJson[OPEN_BOXED_QTY])
-        self.assertEqual(expectRestockLevel, returnJson[RESTOCK_LEVEL])
-        self.assertEqual(expectRestockAmt, returnJson[RESTOCK_AMT])
+    def assert_fields_equal(self, return_json, expect_prod_id, expect_prod_name, expect_new_qty,
+            expect_used_qty, expect_open_qty, expect_restock_level, expect_restock_amt):
+        self.assertEqual(expect_prod_id, return_json[PROD_ID])
+        self.assertEqual(expect_prod_name, return_json[PROD_NAME])
+        self.assertEqual(expect_new_qty, return_json[NEW_QTY])
+        self.assertEqual(expect_used_qty, return_json[USED_QTY])
+        self.assertEqual(expect_open_qty, return_json[OPEN_BOXED_QTY])
+        self.assertEqual(expect_restock_level, return_json[RESTOCK_LEVEL])
+        self.assertEqual(expect_restock_amt, return_json[RESTOCK_AMT])
 
-    def getEntryCount(self):
+    def get_entry_count(self):
         """ save the current number of product information entries """
         response = self.app.get(PATH_INVENTORY)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
