@@ -63,8 +63,21 @@ def internal_server_error(error):
 ######################################################################
 @app.route('/')
 def index():
-    """ Return something useful by default """
-    return jsonify(name='Inventory Root'), HTTP_200_OK
+    """ Return help information about the API """
+    return jsonify(
+        name='Inventory Management REST API Service',
+        version='1.0',
+        usage={
+            'help': 'GET /',
+            'list all': 'GET /inventory',
+            'read': 'GET /inventory/{prod_id}',
+            'add': 'POST /inventory',
+            'update': 'PUT /inventory/{prod_id}',
+            'delete': 'DELETE /inventory/{prod_id}',
+            'query': 'GET /inventory?{prod_name|quantity|condition=val}',
+            'restock': 'PUT /inventory/{prod_id}/restock',
+        },
+    ), HTTP_200_OK
 
 @app.route('/inventory', methods=['GET'])
 def list_inventory():
