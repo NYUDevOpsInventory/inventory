@@ -35,6 +35,7 @@ DEFAULT_RESTOCK_LEVEL = -1
 DEFALUT_RESTOCK_AMT = 0
 # API paths
 PATH_INVENTORY = '/inventory'
+PATH_INVENTORY_PROD_ID = '/inventory/{}'
 # Content type
 JSON = 'application/json'
 # Location header
@@ -144,6 +145,22 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(entry_count + 1, len(data))
         self.assertIn(return_json, data)
+
+    def test_delete_prod_info(self):
+        entry_count = self.get_entry_count()
+        
+        # Test deleting product information with existing prod_id
+        test_prod_id = 1
+        response = self.app.delete(PATH_INVENTORY_PROD_ID.format(test_prod_id), content_type=JSON)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(entry_count - 1, self.get_entry_count())
+
+        # Test deleting product information with non-existing prod_id
+        test_prod_id = 3
+        response = self.app.delete(PATH_INVENTORY_PROD_ID.format(test_prod_id), content_type=JSON)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(entry_count - 1, self.get_entry_count())
+
 
 ######################################################################
 # Utility functions
