@@ -17,3 +17,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt

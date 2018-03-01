@@ -7,6 +7,8 @@ from flask_api import status
 from models import DataValidationError, ProductInformation
 from werkzeug.exceptions import BadRequest, NotFound
 import os
+import logging
+import sys
 
 ######################################################################
 #  Fixed Global Variables
@@ -46,6 +48,8 @@ LOCATION = 'Location'
 # Create Flask application
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URL'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['LOGGING_LEVEL'] = logging.INFO
 
 ######################################################################
 # Error Handlers
@@ -58,24 +62,32 @@ def request_validation_error(error):
 @app.errorhandler(status.HTTP_400_BAD_REQUEST)
 def bad_request(error):
     """ Handles requests that have bad or malformed data """
+    message = error.message or str(error)
+    app.logger.info(message)
     return jsonify(status = status.HTTP_400_BAD_REQUEST, error = BAD_REQUEST_ERROR,
             message = error.message), status.HTTP_400_BAD_REQUEST
 
 @app.errorhandler(status.HTTP_404_NOT_FOUND)
 def not_found(error):
     """ Handles product information that cannot be found """
+    message = error.message or str(error)
+    app.logger.info(message)
     return jsonify(status = status.HTTP_404_NOT_FOUND, error = NOT_FOUND_ERROR,
             message = error.message), status.HTTP_404_NOT_FOUND
 
 @app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED)
 def method_not_supported(error):
     """ Handles bad method calls """
+    message = error.message or str(error)
+    app.logger.info(message)
     return jsonify(status = status.HTTP_405_METHOD_NOT_ALLOWED, error = METHOD_NOT_ALLOWED_ERROR,
                    message = METHOD_NOT_ALLOWED_MSG), status.HTTP_405_METHOD_NOT_ALLOWED
 
 @app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
 def internal_server_error(error):
     """ Handles catostrophic errors """
+    message = error.message or str(error)
+    app.logger.info(message)
     return jsonify(status = status.HTTP_500_INTERNAL_SERVER_ERROR, error = INTERNAL_SERVER_ERROR,
             message = error.message), status.HTTP_500_INTERNAL_SERVER_ERROR
 
@@ -162,6 +174,26 @@ def check_content_type(content_type):
     app.logger.error(INVALID_CONTENT_TYPE_ERROR, request.headers[CONTENT_TYPE])
     abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, INVALID_CONTENT_TYPE_MSG.format(content_type))
 
+def initialize_logging(log_level=logging.INFO):
+    """ Initialized the default logging to STDOUT """
+    if not app.debug:
+        print ("Setting up logging...")
+        # Set up default logging for submodules to use STDOUT
+        # datefmt='%m/%d/%Y %I:%M:%S %p'
+        fmt = '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+        logging.basicConfig(stream=sys.stdout, level=log_level, format=fmt)
+        # Make a new log handler that uses STDOUT
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter(fmt))
+        handler.setLevel(log_level)
+        # Remove the Flask default handlers and use our own
+        handler_list = list(app.logger.handlers)
+        for log_handler in handler_list:
+            app.logger.removeHandler(log_handler)
+        app.logger.addHandler(handler)
+        app.logger.setLevel(log_level)
+        app.logger.info('Logging handler established')
+
 ######################################################################
 #   M A I N
 ######################################################################
@@ -169,5 +201,6 @@ if __name__ == "__main__":
     print("**********************************")
     print("   INVENTORY MANAGEMENT SERVICE   ")
     print("**********************************")
+    initialize_logging(logging.INFO)
     init_db()  # make our sqlalchemy tables
     app.run(host='0.0.0.0', port=int(PORT), debug=DEBUG)
