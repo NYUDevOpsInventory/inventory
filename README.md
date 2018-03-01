@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/NYUDevOpsInventory/inventory.svg?branch=master)](https://travis-ci.org/NYUDevOpsInventory/inventory)
+
 # Inventory Team
 
 
