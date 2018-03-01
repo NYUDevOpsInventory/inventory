@@ -98,7 +98,7 @@ def index():
             'query': 'GET /inventory?{prod_name|quantity|condition=val}',
             'restock': 'PUT /inventory/{prod_id}/restock',
         },
-    ), HTTP_200_OK
+    ), status.HTTP_200_OK
 
 @app.route(PATH_INVENTORY, methods=[GET])
 def list_inventory():
@@ -146,7 +146,7 @@ def delete_prod_info(prod_id):
     if prod_info:
         prod_info.delete()
     return make_response('Product information deleted.', status.HTTP_200_OK)
-    
+
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
