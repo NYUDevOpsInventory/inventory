@@ -71,6 +71,7 @@ class TestInventoryServer(unittest.TestCase):
         db.drop_all()
 
     def test_create_prod_info_bad_request(self):
+        """ Test cases where not all mandatory fields are given. """
         data = json.dumps({})
         response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
@@ -82,6 +83,19 @@ class TestInventoryServer(unittest.TestCase):
         data = json.dumps({PROD_NAME: 'whatsup'})
         response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+        """ Test case for adding duplicate product information. """
+        test_prod_id = 100
+        test_prod_name = 'asdf'
+        data = json.dumps({PROD_ID: test_prod_id, PROD_NAME: test_prod_name})
+        self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
+        response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
+
+        # BadRequest on adding duplicates but 200OK after adding a different record.
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+        data = json.dumps({PROD_ID: 222, PROD_NAME: "zxcv"})
+        response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
     def test_create_prod_info_with_all_fields(self):
         entry_count = self.get_entry_count()
