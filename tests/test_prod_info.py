@@ -181,3 +181,6 @@ class TestProductInformation(unittest.TestCase):
         self.assertEqual(expect_open_boxed_qty, prod_info.open_boxed_qty)
         self.assertEqual(expect_restock_level, prod_info.restock_level)
         self.assertEqual(expect_restock_amt, prod_info.restock_amt)
+
+if __name__ == '__main__':
+    unittest.main()
