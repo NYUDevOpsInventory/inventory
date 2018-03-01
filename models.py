@@ -39,6 +39,8 @@ OPEN_BOXED_QTY = 'open_boxed_qty'
 RESTOCK_LEVEL = 'restock_level'
 RESTOCK_AMT = 'restock_amt'
 
+BAD_DATA_MSG = 'Invalid ProductInformation: body of request contained bad or no data'
+
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
     pass
@@ -101,7 +103,7 @@ class ProductInformation(db.Model):
                 initialize the ProductInformation properties to default value.
         """
         if not isinstance(data, dict):
-            raise DataValidationError('Invalid ProductInformation: body of request contained bad or no data')
+            raise DataValidationError(BAD_DATA_MSG)
         # only prod_id & prod_name is a must-have property
         try:
             self.prod_id = data[PROD_ID]
@@ -109,15 +111,29 @@ class ProductInformation(db.Model):
         except KeyError as error:
             raise DataValidationError('Invalid ProductInformation: missing ' + error.args[0])
         except TypeError as error:
-            raise DataValidationError('Invalid ProductInformation: body of request contained' \
-                                      'bad or no data')
+            raise DataValidationError(BAD_DATA_MSG)
 
+        data_new_qty = data.get(NEW_QTY)
+        data_used_qty = data.get(USED_QTY)
+        data_open_boxed_qty = data.get(OPEN_BOXED_QTY)
+        data_restock_level = data.get(RESTOCK_LEVEL)
+        data_restock_amt = data.get(RESTOCK_AMT)
+
+        # Ensure optional fields are not smaller than default values.
+        if (data_new_qty is not None and data_new_qty < DEFAULT_NEW_QTY) or \
+                (data_used_qty is not None and data_used_qty < DEFAULT_USED_QTY) or \
+                (data_open_boxed_qty is not None and data_open_boxed_qty < DEFAULT_OPEN_BOXED_QTY) \
+                or \
+                (data_restock_level is not None and data_restock_level < DEFAULT_RESTOCK_LEVEL) or \
+                (data_restock_amt is not None and data_restock_amt < DEFALUT_RESTOCK_AMT):
+            raise DataValidationError(BAD_DATA_MSG)
+        
         # populate ProductInformation with given data or None
-        self.new_qty = data.get(NEW_QTY)
-        self.used_qty = data.get(USED_QTY)
-        self.open_boxed_qty = data.get(OPEN_BOXED_QTY)
-        self.restock_level = data.get(RESTOCK_LEVEL)
-        self.restock_amt = data.get(RESTOCK_AMT)
+        self.new_qty = data_new_qty
+        self.used_qty = data_used_qty
+        self.open_boxed_qty = data_open_boxed_qty
+        self.restock_level = data_restock_level
+        self.restock_amt = data_restock_amt
 
         if initialize_property:
             if self.new_qty is None:

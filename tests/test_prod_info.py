@@ -118,9 +118,16 @@ class TestProductInformation(unittest.TestCase):
 
     def test_deserialize_bad_data(self):
         """ Test deserialization of bad data. """
-        data = "this is not a dictionary"
         prod_info = ProductInformation()
+
+        # Input data is not of JSON format.
+        data = "this is not a dictionary"
         self.assertRaises(DataValidationError, prod_info.deserialize, data)
+
+        # Optional fields contain values smaller than defaults.
+        prod_info = ProductInformation(prod_id = 1, prod_name = "ert", new_qty = -1, used_qty = -1, open_boxed_qty = -1, restock_level = -2, restock_amt = -1)
+        self.assertRaises(DataValidationError, prod_info.deserialize, data)
+
 
     def test_serialize_prod_info(self):
         test_prod_id = 911
