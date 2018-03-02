@@ -99,6 +99,7 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
     def test_create_prod_info_with_all_fields(self):
+        """ Creating new product information with all fields. """
         entry_count = self.get_entry_count()
 
         test_prod_id = 233333
@@ -126,6 +127,7 @@ class TestInventoryServer(unittest.TestCase):
         self.assertIn(return_json, data)
                 
     def test_create_prod_info_with_mandatory_fields(self):
+        """ Creating new product information with mandatory fields given. """
         entry_count = self.get_entry_count()
 
         test_prod_id = 233
@@ -147,6 +149,7 @@ class TestInventoryServer(unittest.TestCase):
         self.assertIn(return_json, data)
 
     def test_delete_prod_info(self):
+        """ Deleting product information. """
         entry_count = self.get_entry_count()
         
         # Test deleting product information with existing prod_id
@@ -161,6 +164,14 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(entry_count - 1, self.get_entry_count())
 
+    def test_list_all_prod_info(self):
+        """ List all product information in database. """
+        response = self.app.get(PATH_INVENTORY)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = json.loads(response.data)
+        self.assertEqual(2, len(data))
+        self.assert_fields_equal(data[0], 1, 'a', 1, 1, 1, 10, 10)
+        self.assert_fields_equal(data[1], 2, 'b', 2, 2, 2, 20, 20)
 
 ######################################################################
 # Utility functions
