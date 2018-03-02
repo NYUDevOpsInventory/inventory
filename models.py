@@ -161,6 +161,9 @@ class ProductInformation(db.Model):
         if not isinstance(data, dict):
             raise DataValidationError(BAD_DATA_MSG)
         #retrive all the data
+        data_prod_id = data.get(PROD_ID)
+        if data_prod_id is not None:
+            raise DataValidationError(BAD_DATA_MSG)
         data_prod_name = data.get(PROD_NAME)
         data_new_qty = data.get(NEW_QTY)
         data_used_qty = data.get(USED_QTY)

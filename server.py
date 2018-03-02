@@ -166,17 +166,16 @@ def update_prod_info(prod_id):
 
     This endpoint will update a ProductInformation based on data that id posted in the body
     """
-    check_content_type('application/json')
+    check_content_type(JSON)
     prod_info = ProductInformation.find(prod_id)
     if not prod_info:
         raise NotFound("Product with id '{}' was not found.".format(prod_id))
 
     prod_info.deserialize_update(request.get_json())
-    if prod_info.prod_id == prod_id:
-        prod_info.save()
-        return make_response(jsonify(prod_info.serialize()), status.HTTP_200_OK)
-    else:
-        raise NotFound("Product with id '{}' was not found.".format(prod_id))
+    prod_info.save()
+    return make_response(jsonify(prod_info.serialize()), status.HTTP_200_OK)
+
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

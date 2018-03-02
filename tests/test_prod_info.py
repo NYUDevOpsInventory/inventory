@@ -198,10 +198,13 @@ class TestProductInformation(unittest.TestCase):
         update_prod_id = 3
         test_prod_name = "fire"
         data = {PROD_ID: update_prod_id,PROD_NAME: test_prod_name,RESTOCK_AMT : 5}
-        prod_info.deserialize_update(data)
-        self.assertIsNotNone(prod_info)
-        self.assert_fields_equal(prod_info, test_prod_id, test_prod_name,
-                None, None, None, None, 5)
+        prod_info = ProductInformation()
+        self.assertRaises(DataValidationError, prod_info.deserialize_update, data)
+
+        # Optional fields contain values smaller than defaults.
+        prod_info = ProductInformation(prod_name = "ert", new_qty = -1, used_qty = -1, open_boxed_qty = -1, restock_level = -2, restock_amt = -1)
+        self.assertRaises(DataValidationError, prod_info.deserialize_update, data)
+
 
 ######################################################################
 # Utility functions
