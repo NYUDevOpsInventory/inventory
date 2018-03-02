@@ -157,7 +157,7 @@ class TestProductInformation(unittest.TestCase):
         test_prod_name = "ab"
         prod_info = ProductInformation(prod_id = test_prod_id, prod_name = test_prod_name)
         prod_info.save()
-        
+
         # update
         test_new_qty = 10
         test_used_qty = 30
@@ -175,6 +175,33 @@ class TestProductInformation(unittest.TestCase):
         self.assertIsNotNone(prod_infos[0])
         self.assert_fields_equal(prod_infos[0], test_prod_id, test_prod_name, test_new_qty,
                 test_used_qty, test_open_boxed_qty, test_restock_level, test_restock_amt)
+
+    def test_deserialize_update_prod_info(self):
+        """ Test deserialization while updating product information. """
+        #create entry in order check deserialization
+        test_prod_id = 1
+        test_prod_name = "asdf"
+        prod_info = ProductInformation(prod_id = test_prod_id, prod_name = test_prod_name)
+        self.assertIsNotNone(prod_info)
+        self.assert_fields_equal(prod_info, test_prod_id, test_prod_name,
+                None, None, None, None, None)
+
+        #test deserialize_update when
+        test_prod_name = "fire"
+        data = {PROD_NAME: test_prod_name,RESTOCK_AMT : 5}
+        prod_info.deserialize_update(data)
+        self.assertIsNotNone(prod_info)
+        self.assert_fields_equal(prod_info, test_prod_id, test_prod_name,
+                None, None, None, None, 5)
+
+        #test deserilaize_update when prod_id is provided
+        update_prod_id = 3
+        test_prod_name = "fire"
+        data = {PROD_ID: update_prod_id,PROD_NAME: test_prod_name,RESTOCK_AMT : 5}
+        prod_info.deserialize_update(data)
+        self.assertIsNotNone(prod_info)
+        self.assert_fields_equal(prod_info, test_prod_id, test_prod_name,
+                None, None, None, None, 5)
 
 ######################################################################
 # Utility functions
