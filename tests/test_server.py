@@ -99,6 +99,7 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
     def test_create_prod_info_with_all_fields(self):
+        """ Creating new product information with all fields. """
         entry_count = self.get_entry_count()
 
         test_prod_id = 233333
@@ -126,6 +127,7 @@ class TestInventoryServer(unittest.TestCase):
         self.assertIn(return_json, data)
 
     def test_create_prod_info_with_mandatory_fields(self):
+        """ Creating new product information with mandatory fields given. """
         entry_count = self.get_entry_count()
 
         test_prod_id = 233
@@ -147,6 +149,7 @@ class TestInventoryServer(unittest.TestCase):
         self.assertIn(return_json, data)
 
     def test_delete_prod_info(self):
+        """ Deleting product information. """
         entry_count = self.get_entry_count()
 
         # Test deleting product information with existing prod_id
@@ -160,6 +163,22 @@ class TestInventoryServer(unittest.TestCase):
         response = self.app.delete(PATH_INVENTORY_PROD_ID.format(test_prod_id), content_type=JSON)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(entry_count - 1, self.get_entry_count())
+
+    def test_list_all_prod_info(self):
+        """ List all product information in database. """
+        response = self.app.get(PATH_INVENTORY)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = json.loads(response.data)
+        self.assertEqual(2, len(data))
+        self.assert_fields_equal(data[0], 1, 'a', 1, 1, 1, 10, 10)
+        self.assert_fields_equal(data[1], 2, 'b', 2, 2, 2, 20, 20)
+
+        # should return a message when table is empty
+        response = self.app.delete(PATH_INVENTORY_PROD_ID.format(1), content_type=JSON)
+        response = self.app.delete(PATH_INVENTORY_PROD_ID.format(2), content_type=JSON)
+        response = self.app.get(PATH_INVENTORY)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual("Inventory is empty.", response.data)        
 
     def test_update_prof_info(self):
 
@@ -179,7 +198,6 @@ class TestInventoryServer(unittest.TestCase):
         data = json.dumps({PROD_NAME :'zen',NEW_QTY :3,RESTOCK_AMT : 7})
         response = self.app.put(PATH_INVENTORY_PROD_ID.format(test_prod_id),data= data, content_type=JSON)
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
-
 
 ######################################################################
 # Utility functions
