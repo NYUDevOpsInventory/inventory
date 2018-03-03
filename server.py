@@ -115,6 +115,9 @@ def index():
 @app.route(PATH_INVENTORY, methods=[GET])
 def list_all_prod_info():
     """ Return all entries in the Inventory system """
+    all_prod_info = ProductInformation.list_all()
+    if (len(all_prod_info) == 0):
+        return make_response('Inventory is empty.', status.HTTP_200_OK)
     results = [prod_info.serialize() for prod_info in ProductInformation.list_all()]
     return jsonify(results), status.HTTP_200_OK
 

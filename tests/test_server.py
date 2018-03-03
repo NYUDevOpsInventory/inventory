@@ -173,6 +173,13 @@ class TestInventoryServer(unittest.TestCase):
         self.assert_fields_equal(data[0], 1, 'a', 1, 1, 1, 10, 10)
         self.assert_fields_equal(data[1], 2, 'b', 2, 2, 2, 20, 20)
 
+        # should return a message when table is empty
+        response = self.app.delete(PATH_INVENTORY_PROD_ID.format(1), content_type=JSON)
+        response = self.app.delete(PATH_INVENTORY_PROD_ID.format(2), content_type=JSON)
+        response = self.app.get(PATH_INVENTORY)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual("Inventory is empty.", response.data)        
+
 ######################################################################
 # Utility functions
 ######################################################################
