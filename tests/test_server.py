@@ -148,6 +148,19 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(entry_count + 1, len(data))
         self.assertIn(return_json, data)
 
+    def test_read_prod_info(self):
+        """ Read a product information """
+        # Test reading a non-exist product infomation
+        response = self.app.get(PATH_INVENTORY_PROD_ID.format(666))
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+
+        # Test reading an exist product infomation
+        response = self.app.get(PATH_INVENTORY_PROD_ID.format(1))
+        data = json.loads(response.data)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(data[PROD_ID], 1)
+        self.assertEqual(data[PROD_NAME], 'a')
+
     def test_delete_prod_info(self):
         """ Deleting product information. """
         entry_count = self.get_entry_count()
@@ -178,7 +191,7 @@ class TestInventoryServer(unittest.TestCase):
         response = self.app.delete(PATH_INVENTORY_PROD_ID.format(2), content_type=JSON)
         response = self.app.get(PATH_INVENTORY)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual("Inventory is empty.", response.data)        
+        self.assertEqual("Inventory is empty.", response.data)
 
     def test_update_prof_info(self):
 
