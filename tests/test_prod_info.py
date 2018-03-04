@@ -205,8 +205,8 @@ class TestProductInformation(unittest.TestCase):
         prod_info = ProductInformation(prod_name = "ert", new_qty = -1, used_qty = -1, open_boxed_qty = -1, restock_level = -2, restock_amt = -1)
         self.assertRaises(DataValidationError, prod_info.deserialize_update, data)
 
-    def test_query_by_prod_name(self):
-        """ Test query by the product name """
+    def test_find_by_name(self):
+        """ Test find by the product name """
         ProductInformation(prod_id=1234, prod_name="foo").save()
         ProductInformation(prod_id=4321, prod_name="bar").save()
 
@@ -219,8 +219,8 @@ class TestProductInformation(unittest.TestCase):
         result = ProductInformation.find_by_name("foo")
         self.assertEqual(2, len(result))
 
-    def test_query_by_prod_quantity(self):
-        """ Test query by the product quantity """
+    def test_find_by_quantity(self):
+        """ Test find by the product quantity """
         ProductInformation(prod_id=1234, new_qty=1, used_qty=2, open_boxed_qty=3).save()
         ProductInformation(prod_id=4321, new_qty=5, used_qty=1, open_boxed_qty=2).save()
 
@@ -235,8 +235,11 @@ class TestProductInformation(unittest.TestCase):
         self.assertEqual(1, len(result))
         self.assertEqual(4321, result[0].prod_id)
 
-    def test_query_by_prod_condition(self):
-        """ Test query by the product condition """
+        result = ProductInformation.find_by_quantity(-1)
+        self.assertEqual(0, len(result))
+
+    def test_find_by_condition(self):
+        """ Test find by the product condition """
         ProductInformation(prod_id=1234, new_qty=1, used_qty=0, open_boxed_qty=0).save()
         ProductInformation(prod_id=4321, new_qty=0, used_qty=2, open_boxed_qty=0).save()
         ProductInformation(prod_id=5678, new_qty=1, used_qty=0, open_boxed_qty=3).save()

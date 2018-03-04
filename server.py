@@ -58,15 +58,16 @@ app.config['LOGGING_LEVEL'] = logging.INFO
 @app.errorhandler(DataValidationError)
 def request_validation_error(error):
     """ Handles all data validation issues from the model """
-    return bad_request(error)
+    app.logger.info(error.message)
+    return jsonify(status = status.HTTP_400_BAD_REQUEST, error = BAD_REQUEST_ERROR,
+            message = error.message), status.HTTP_400_BAD_REQUEST
 
 @app.errorhandler(status.HTTP_400_BAD_REQUEST)
 def bad_request(error):
     """ Handles requests that have bad or malformed data """
-    message = error.message or str(error)
-    app.logger.info(message)
+    app.logger.info(str(error))
     return jsonify(status = status.HTTP_400_BAD_REQUEST, error = BAD_REQUEST_ERROR,
-            message = message), status.HTTP_400_BAD_REQUEST
+            message = error.description), status.HTTP_400_BAD_REQUEST
 
 @app.errorhandler(status.HTTP_404_NOT_FOUND)
 def not_found(error):
@@ -119,8 +120,6 @@ def query_prod_info():
     all_prod_info = []
     if request.args.get('prod_name'):
         prod_name = request.args.get('prod_name')
-        if prod_name == None:
-            abort(status.HTTP_400_BAD_REQUEST, INVALID_PARAMETER_MSG)
         all_prod_info = ProductInformation.find_by_name(prod_name)
     elif request.args.get('quantity'):
         quantity = request.args.get('quantity')

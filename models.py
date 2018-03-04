@@ -41,6 +41,7 @@ RESTOCK_LEVEL = 'restock_level'
 RESTOCK_AMT = 'restock_amt'
 
 BAD_DATA_MSG = 'Invalid ProductInformation: body of request contained bad or no data'
+BAD_PARAMETER_MSG = 'Invalid parameters in the request'
 
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
@@ -244,7 +245,7 @@ class ProductInformation(db.Model):
         elif condition == "open-boxed":
             return ProductInformation.query.filter(ProductInformation.open_boxed_qty > 0).all()
         else:
-            return None
+            raise DataValidationError(BAD_PARAMETER_MSG)
 
     @staticmethod
     def list_all():
