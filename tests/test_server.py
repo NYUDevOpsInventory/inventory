@@ -199,9 +199,9 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
         # Test restock given a negative restock_amt.
-        response = self.app.put(PATH_RESTOCK.format(3), data=json.dumps({RESTOCK_AMT: -43}),
+        response = self.app.put(PATH_RESTOCK.format(1), data=json.dumps({RESTOCK_AMT: -43}),
                 content_type=JSON)
-        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
         # Test restocking an existing product with only restock_amt given.
         test_prod_id = 1
