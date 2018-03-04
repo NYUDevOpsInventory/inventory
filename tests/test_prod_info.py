@@ -131,26 +131,26 @@ class TestProductInformation(unittest.TestCase):
     def test_deserialize_restock(self):
         prod_info = ProductInformation()
 
-        """ Test deserialize_restock() with non-dictionary format input. """
+        # Test deserialize_restock() with non-dictionary format input.
         data = "this is not a dictionary."
         self.assertRaises(DataValidationError, prod_info.deserialize_restock, data)
 
-        """ Test deserialize_restock() input data when new_qty is None. """
+        # Test deserialize_restock() input data when new_qty is None.
         data = {RESTOCK_AMT: 19}
         self.assertRaises(DataValidationError, prod_info.deserialize_restock, data)
 
-        """ Test deserialize_restock() with input having not only restock_amt value. """
+        # Test deserialize_restock() with input having not only restock_amt value.
         data = {USED_QTY: 100, RESTOCK_LEVEL: 89}
         self.assertRaises(DataValidationError, prod_info.deserialize_restock, data)
 
-        """ Test deserialize_restock() when new_qty is not None but restock_amt is negative. """
+        # Test deserialize_restock() when new_qty is not None but restock_amt is negative.
         test_restock_amt = -6
         test_new_qty = 3
         prod_info.new_qty = test_new_qty
         self.assertRaises(DataValidationError, prod_info.deserialize_restock,
                 {RESTOCK_AMT: test_restock_amt})
 
-        """ Test deserialize_restock() when new_qty is not None. """
+        # Test deserialize_restock() when new_qty is not None.
         test_restock_amt = 68
         prod_info.deserialize_restock({RESTOCK_AMT: test_restock_amt}) 
         self.assertIsNotNone(prod_info)
