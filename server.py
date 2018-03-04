@@ -196,7 +196,12 @@ def restock_action(prod_id):
     if not prod_info:
         raise NotFound(NOT_FOUND_MSG.format(prod_id))
 
-    prod_info.deserialize_restock(request.get_json())
+    data = request.get_json()
+    add_amt = data.get('restock_amt')
+    if (len(list(data.keys())) != 1) or (add_amt is None) or (add_amt < 0):
+        raise BadRequest("Please only give 'restock_amt' as input.")
+
+    prod_info.restock(add_amt)
     prod_info.save()
     return make_response(jsonify(prod_info.serialize()), status.HTTP_200_OK)
 
