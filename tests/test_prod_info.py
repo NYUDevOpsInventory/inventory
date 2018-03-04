@@ -205,6 +205,64 @@ class TestProductInformation(unittest.TestCase):
         prod_info = ProductInformation(prod_name = "ert", new_qty = -1, used_qty = -1, open_boxed_qty = -1, restock_level = -2, restock_amt = -1)
         self.assertRaises(DataValidationError, prod_info.deserialize_update, data)
 
+    def test_query_by_prod_name(self):
+        """ Test query by the product name """
+        prod1 = ProductInformation(prod_id=1234, prod_name="foo")
+        prod1.save()
+
+        prod2 = ProductInformation(prod_id=4321, prod_name="bar")
+        prod2.save()
+
+        result = ProductInformation.find_by_name("foo")
+        self.assertEqual(1, len(result))
+        self.assertEqual(1234, result[0].prod_id)
+
+        prod3 = ProductInformation(prod_id=5678, prod_name="foo")
+        prod3.save()
+
+        result = ProductInformation.find_by_name("foo")
+        self.assertEqual(2, len(result))
+
+    def test_query_by_prod_quantity(self):
+        """ Test query by the product quantity """
+        prod1 = ProductInformation(prod_id=1234, new_qty=1, used_qty=2, open_boxed_qty=3)
+        prod1.save()
+
+        prod2 = ProductInformation(prod_id=4321, new_qty=5, used_qty=1, open_boxed_qty=2)
+        prod2.save()
+
+        result = ProductInformation.find_by_quantity(1)
+        self.assertEqual(0, len(result))
+
+        result = ProductInformation.find_by_quantity(6)
+        self.assertEqual(1, len(result))
+        self.assertEqual(1234, result[0].prod_id)
+
+        result = ProductInformation.find_by_quantity(8)
+        self.assertEqual(1, len(result))
+        self.assertEqual(4321, result[0].prod_id)
+
+    def test_query_by_prod_condition(self):
+        """ Test query by the product condition """
+        prod1 = ProductInformation(prod_id=1234, new_qty=1, used_qty=0, open_boxed_qty=0)
+        prod1.save()
+
+        prod2 = ProductInformation(prod_id=4321, new_qty=0, used_qty=2, open_boxed_qty=0)
+        prod2.save()
+
+        prod3 = ProductInformation(prod_id=5678, new_qty=1, used_qty=0, open_boxed_qty=3)
+        prod3.save()
+
+        result = ProductInformation.find_by_condition("new")
+        self.assertEqual(2, len(result))
+
+        result = ProductInformation.find_by_condition("used")
+        self.assertEqual(1, len(result))
+        self.assertEqual(4321, result[0].prod_id)
+
+        result = ProductInformation.find_by_condition("open-boxed")
+        self.assertEqual(1, len(result))
+        self.assertEqual(5678, result[0].prod_id)
 
 ######################################################################
 # Utility functions

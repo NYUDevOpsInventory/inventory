@@ -211,6 +211,42 @@ class ProductInformation(db.Model):
         return ProductInformation.query.get(prod_id)
 
     @staticmethod
+    def find_by_name(name):
+        """ Returns all inventories with the given name
+
+        Args:
+            name (string): the name of the inventory you want to match
+        """
+        return ProductInformation.query.filter(ProductInformation.prod_name == name).all()
+
+    @staticmethod
+    def find_by_quantity(quantity):
+        """ Returns all inventories with the given quantity
+
+        Args:
+            quantity (int): the quantity of the inventory you want to match
+        """
+        return ProductInformation.query.filter(
+            ProductInformation.new_qty + ProductInformation.used_qty
+            + ProductInformation.open_boxed_qty == quantity).all()
+
+    @staticmethod
+    def find_by_condition(condition):
+        """ Returns all inventories with the given condition
+
+        Args:
+            condition (string): the condition of the inventory you want to match
+        """
+        if condition == "new":
+            return ProductInformation.query.filter(ProductInformation.new_qty > 0).all()
+        elif condition == "used":
+            return ProductInformation.query.filter(ProductInformation.used_qty > 0).all()
+        elif condition == "open-boxed":
+            return ProductInformation.query.filter(ProductInformation.open_boxed_qty > 0).all()
+        else:
+            return None
+
+    @staticmethod
     def list_all():
         """ Returns all ProductInformation in the database """
         return ProductInformation.query.all()
