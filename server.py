@@ -25,6 +25,8 @@ PUT = 'PUT'
 PATH_ROOT = '/'
 PATH_INVENTORY = '/inventory'
 PATH_INVENTORY_PROD_ID = '/inventory/<int:prod_id>'
+# Action paths
+PATH_RESTOCK = '/inventory/<int:prod_id>/restock'
 # Errors
 BAD_REQUEST_ERROR = 'Bad Request.'
 INTERNAL_SERVER_ERROR = 'Internal Server Error'
@@ -37,7 +39,7 @@ CANNOT_CREATE_MSG = "Product with id '{}' already existed. Cannot create new pro
 INVALID_CONTENT_TYPE_MSG = 'Content-Type must be {}'
 METHOD_NOT_ALLOWED_MSG = 'Your request method is not supported.' \
                    ' Check your HTTP method and try again.'
-NOT_FOUND_MSG = "Product with id '{}' was not found in Inventory"
+NOT_FOUND_MSG = "Product with id '{}' was not found in Inventory."
 # Content type
 CONTENT_TYPE = 'Content-Type'
 JSON = 'application/json'
@@ -172,13 +174,31 @@ def update_prod_info(prod_id):
     check_content_type(JSON)
     prod_info = ProductInformation.find(prod_id)
     if not prod_info:
-        raise NotFound("Product with id '{}' was not found.".format(prod_id))
+        raise NotFound(NOT_FOUND_MSG.format(prod_id))
 
     prod_info.deserialize_update(request.get_json())
     prod_info.save()
     return make_response(jsonify(prod_info.serialize()), status.HTTP_200_OK)
 
 
+######################################################################
+# Action placeholder
+######################################################################
+@app.route(PATH_RESTOCK, methods=[PUT])
+def restock_action(prod_id):
+    """
+    Restock new quantity.
+
+    This endpoint will update the number of new_qty of the given prod_id.
+    """
+    check_content_type(JSON)
+    prod_info = ProductInformation.find(prod_id)
+    if not prod_info:
+        raise NotFound(NOT_FOUND_MSG.format(prod_id))
+
+    prod_info.deserialize_restock(request.get_json())
+    prod_info.save()
+    return make_response(jsonify(prod_info.serialize()), status.HTTP_200_OK)
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

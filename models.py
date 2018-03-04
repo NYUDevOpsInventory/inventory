@@ -149,6 +149,26 @@ class ProductInformation(db.Model):
                 self.restock_amt = DEFALUT_RESTOCK_AMT
 
         return self
+
+    def deserialize_restock(self, data, initialize_property=True):
+        """
+        Deserializes a ProductInformation from a dictionary.
+
+        Only restock_amt should exist in data.
+        """
+        if (not isinstance(data, dict)):
+            raise DataValidationError(BAD_DATA_MSG)
+
+        add_amt = data.get(RESTOCK_AMT)
+        if (len(list(data.keys())) != 1) or (add_amt is None) or (add_amt < DEFALUT_RESTOCK_AMT):
+            raise DataValidationError(BAD_DATA_MSG)
+
+        if (self.new_qty is None):
+            raise DataValidationError(BAD_DATA_MSG)
+        self.new_qty += add_amt
+        
+        return self
+
     def deserialize_update(self, data, initialize_property=True):
         """
         Deserializes an ProductInformation from a dictionary.
