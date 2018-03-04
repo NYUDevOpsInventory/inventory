@@ -170,8 +170,9 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = json.loads(response.data)
         self.assertEqual(2, len(data))
-        self.assert_fields_equal(data[0], 1, 'a', 1, 1, 1, 10, 10)
-        self.assert_fields_equal(data[1], 2, 'b', 2, 2, 2, 20, 20)
+        # new_qty changed due to automatic restocking.
+        self.assert_fields_equal(data[0], 1, 'a', 11, 1, 1, 10, 10)
+        self.assert_fields_equal(data[1], 2, 'b', 22, 2, 2, 20, 20)
 
         # should return a message when table is empty
         response = self.app.delete(PATH_INVENTORY_PROD_ID.format(1), content_type=JSON)
@@ -180,23 +181,24 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual("Inventory is empty.", response.data)        
 
-    def test_update_prof_info(self):
-
-        #Test updating existing prod_id
+    def test_update_prod_info(self):
+        """ Test update ProductionInformation """
+        # Test updating existing prod_id
         test_prod_id = 1
-        data = json.dumps({PROD_NAME :'zen',NEW_QTY :3,RESTOCK_AMT: 7})
-        response = self.app.put(PATH_INVENTORY_PROD_ID.format(test_prod_id),data= data, content_type=JSON)
+        data = json.dumps({PROD_NAME: 'zen', NEW_QTY: 3, RESTOCK_AMT: 7})
+        response = self.app.put(PATH_INVENTORY_PROD_ID.format(test_prod_id), data=data, content_type=JSON)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         new_json = json.loads(response.data)
-        self.assertEqual(new_json['prod_id'],1)
+        self.assertEqual(new_json['prod_id'], 1)
         self.assertEqual(new_json['prod_name'], 'zen')
-        self.assertEqual(new_json['new_qty'], 3)
-        self.assertEqual(new_json['restock_amt'],7)
+        # new_qty = 3 + 7 = 10 due to automatic restocking
+        self.assertEqual(new_json['new_qty'], 10)
+        self.assertEqual(new_json['restock_amt'], 7)
 
-        #Test updating non-exisiting prod_id
+        # Test updating non-exisiting prod_id
         test_prod_id = 8
-        data = json.dumps({PROD_NAME :'zen',NEW_QTY :3,RESTOCK_AMT : 7})
-        response = self.app.put(PATH_INVENTORY_PROD_ID.format(test_prod_id),data= data, content_type=JSON)
+        data = json.dumps({PROD_NAME: 'zen', NEW_QTY: 3, RESTOCK_AMT: 7})
+        response = self.app.put(PATH_INVENTORY_PROD_ID.format(test_prod_id), data=data, content_type=JSON)
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
 ######################################################################
