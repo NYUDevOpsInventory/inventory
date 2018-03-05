@@ -36,7 +36,9 @@ DEFALUT_RESTOCK_AMT = 0
 # API paths
 PATH_INVENTORY = '/inventory'
 PATH_INVENTORY_PROD_ID = '/inventory/{}'
-# Action paths
+PATH_INVENTORY_QUERY_BY_PROD_NAME = '/inventory?prod_name={}'
+PATH_INVENTORY_QUERY_BY_QUANTITY = '/inventory?quantity={}'
+PATH_INVENTORY_QUERY_BY_CONDITION = '/inventory?condition={}'
 PATH_RESTOCK = '/inventory/{}/restock'
 # Content type
 JSON = 'application/json'
@@ -195,7 +197,7 @@ class TestInventoryServer(unittest.TestCase):
         response = self.app.delete(PATH_INVENTORY_PROD_ID.format(2), content_type=JSON)
         response = self.app.get(PATH_INVENTORY)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual("Inventory is empty.", response.data)
+        self.assertEqual('No Inventory is found.', response.data)
 
     def test_restock_action(self):
         # Test restocking a non-existing product.
@@ -209,7 +211,7 @@ class TestInventoryServer(unittest.TestCase):
 
         # Test restocking an existing product information given input data more than restock_amt.
         response = self.app.put(PATH_RESTOCK.format(1),
-                data=json.dumps({PROD_NAME: "iririr", RESTOCK_AMT: 43, OPEN_BOXED_QTY: 79}), 
+                data=json.dumps({PROD_NAME: "iririr", RESTOCK_AMT: 43, OPEN_BOXED_QTY: 79}),
                 content_type=JSON)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
@@ -247,6 +249,72 @@ class TestInventoryServer(unittest.TestCase):
         data = json.dumps({PROD_NAME: 'zen', NEW_QTY: 3, RESTOCK_AMT: 7})
         response = self.app.put(PATH_INVENTORY_PROD_ID.format(test_prod_id), data=data, content_type=JSON)
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+
+    def test_query_by_prod_name(self):
+        """ Query by the product name """
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_PROD_NAME.format("b"))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        data = json.loads(response.data)
+        self.assertEqual(2, data[0]['prod_id'])
+
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_PROD_NAME.format("c"))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertTrue('No Inventory is found.', response.data)
+
+    def test_query_by_quantity(self):
+        """ Query by the total quantity """
+        ProductInformation(prod_id=88, new_qty=1, used_qty=1, open_boxed_qty=1, restock_level=0).save()
+        ProductInformation(prod_id=99, new_qty=2, used_qty=2, open_boxed_qty=2, restock_level=0).save()
+
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format(3))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        data = json.loads(response.data)
+        self.assertEqual(88, data[0]['prod_id'])
+
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format(6))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        data = json.loads(response.data)
+        self.assertEqual(99, data[0]['prod_id'])
+
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format(5))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertTrue('No Inventory is found.', response.data)
+
+    def test_query_by_condition(self):
+        """ Query by the product condition """
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_CONDITION.format('new'))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        data = json.loads(response.data)
+        self.assertEqual(2, len(data))
+
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_CONDITION.format('used'))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        data = json.loads(response.data)
+        self.assertEqual(2, len(data))
+
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_CONDITION.format('open-boxed'))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        data = json.loads(response.data)
+        self.assertEqual(2, len(data))
+
+    def test_query_by_invalid_parameters(self):
+        """ Query by invalid parameters (A bad request error is expected.) """
+        # Product name
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_PROD_NAME.format(''))
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+        # Quantity
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format(''))
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format('a'))
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+        # Condition
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_CONDITION.format(''))
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+        response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format('a'))
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
 
 ######################################################################
 # Utility functions
