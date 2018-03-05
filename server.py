@@ -140,6 +140,7 @@ def query_prod_info():
         all_prod_info = ProductInformation.list_all()
     else:
         abort(status.HTTP_400_BAD_REQUEST, INVALID_PARAMETER_MSG)
+
     if (len(all_prod_info) == 0):
         return make_response('No Inventory is found.', status.HTTP_200_OK)
     results = [prod_info.serialize() for prod_info in all_prod_info]

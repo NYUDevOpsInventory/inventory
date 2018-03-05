@@ -211,7 +211,7 @@ class TestInventoryServer(unittest.TestCase):
 
         # Test restocking an existing product information given input data more than restock_amt.
         response = self.app.put(PATH_RESTOCK.format(1),
-                data=json.dumps({PROD_NAME: "iririr", RESTOCK_AMT: 43, OPEN_BOXED_QTY: 79}), 
+                data=json.dumps({PROD_NAME: "iririr", RESTOCK_AMT: 43, OPEN_BOXED_QTY: 79}),
                 content_type=JSON)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
@@ -263,15 +263,18 @@ class TestInventoryServer(unittest.TestCase):
 
     def test_query_by_quantity(self):
         """ Query by the total quantity """
+        ProductInformation(prod_id=88, new_qty=1, used_qty=1, open_boxed_qty=1, restock_level=0).save()
+        ProductInformation(prod_id=99, new_qty=2, used_qty=2, open_boxed_qty=2, restock_level=0).save()
+
         response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format(3))
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         data = json.loads(response.data)
-        self.assertEqual(1, data[0]['prod_id'])
+        self.assertEqual(88, data[0]['prod_id'])
 
         response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format(6))
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         data = json.loads(response.data)
-        self.assertEqual(2, data[0]['prod_id'])
+        self.assertEqual(99, data[0]['prod_id'])
 
         response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format(5))
         self.assertEqual(status.HTTP_200_OK, response.status_code)
