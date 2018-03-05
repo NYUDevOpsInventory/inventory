@@ -51,7 +51,7 @@ class TestInventoryServer(unittest.TestCase):
     def setUpClass(cls):
         """ Run once before all tests """
         server.app.debug = False
-        #server.initialize_logging(logging.INFO)
+        server.initialize_logging(logging.INFO)
         server.app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 
     @classmethod
