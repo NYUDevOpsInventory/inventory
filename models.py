@@ -21,9 +21,8 @@ restock_amt     (int)       - the amount of new products restocked
 
 """
 
-# import threading
-import logging
 from flask_sqlalchemy import SQLAlchemy
+import math
 
 # Default ProductInformation property value
 DEFAULT_NEW_QTY = 0
@@ -41,6 +40,7 @@ RESTOCK_LEVEL = 'restock_level'
 RESTOCK_AMT = 'restock_amt'
 
 BAD_DATA_MSG = 'Invalid ProductInformation: body of request contained bad or no data'
+RESTOCK_FAIL_MSG = 'Automatic restocking failed due to invalid ProductInformation.'
 
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
@@ -70,6 +70,9 @@ class ProductInformation(db.Model):
         Saves an ProductInformation to database,
         currently no duplicate detection is supported.
         """
+        if self.restock_level is not None and self.restock_level > 0:
+            self.automatic_restock()
+
         db.session.add(self)
         db.session.commit()
 
@@ -153,6 +156,22 @@ class ProductInformation(db.Model):
         if (self.new_qty is None):
             raise DataValidationError(BAD_DATA_MSG)
         self.new_qty += amt
+        return self
+
+    def automatic_restock(self):
+        """
+        Adds new products if product quantity drops below 'restock_level'
+        until the total product quantity has reached 'restock_amt',
+        assuming all related properties of ProductInformation are initialized (i.e. not None).
+        """
+        if self.new_qty is None or self.used_qty is None or self.open_boxed_qty is None or \
+                self.restock_level is None or self.restock_amt is None:
+            raise DataValidationError(RESTOCK_FAIL_MSG)
+
+        total_qty = self.new_qty + self.used_qty + self.open_boxed_qty
+        if total_qty < self.restock_level:
+            self.new_qty += self.restock_amt * \
+                    math.ceil((self.restock_level - total_qty) / float(self.restock_amt))
         return self
 
     def deserialize_update(self, data):
