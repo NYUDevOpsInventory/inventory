@@ -22,6 +22,7 @@ restock_amt     (int)       - the amount of new products restocked
 """
 
 from flask_sqlalchemy import SQLAlchemy
+import math
 
 # Default ProductInformation property value
 DEFAULT_NEW_QTY = 0
@@ -70,7 +71,7 @@ class ProductInformation(db.Model):
         currently no duplicate detection is supported.
         """
         if self.restock_level is not None and self.restock_level > 0:
-            self.restock()
+            self.automatic_restock()
 
         db.session.add(self)
         db.session.commit()
@@ -157,6 +158,22 @@ class ProductInformation(db.Model):
         self.new_qty += amt
         return self
 
+    def automatic_restock(self):
+        """
+        Adds new products if product quantity drops below 'restock_level'
+        until the total product quantity has reached 'restock_amt',
+        assuming all related properties of ProductInformation are initialized (i.e. not None).
+        """
+        if self.new_qty is None or self.used_qty is None or self.open_boxed_qty is None or \
+                self.restock_level is None or self.restock_amt is None:
+            raise DataValidationError(RESTOCK_FAIL_MSG)
+
+        total_qty = self.new_qty + self.used_qty + self.open_boxed_qty
+        if total_qty < self.restock_level:
+            self.new_qty += self.restock_amt * \
+                    math.ceil((self.restock_level - total_qty) / float(self.restock_amt))
+        return self
+
     def deserialize_update(self, data):
         """
         Deserializes an ProductInformation from a dictionary.
@@ -202,21 +219,6 @@ class ProductInformation(db.Model):
             self.restock_amt = data_restock_amt
 
         return self
-
-    def restock(self):
-        """
-        Adds new products if product quantity drops below 'restock_level'
-        until the total product quantity has reached 'restock_amt',
-        assuming all related properties of ProductInformation are initialized (i.e. not None).
-        """
-        if self.new_qty is None or self.used_qty is None or self.open_boxed_qty is None or \
-                self.restock_level is None or self.restock_amt is None:
-            raise DataValidationError(RESTOCK_FAIL_MSG)
-
-        total_qty = self.new_qty + self.used_qty + self.open_boxed_qty
-        while total_qty < self.restock_level:
-            self.new_qty += self.restock_amt
-            total_qty += self.restock_amt
 
     @staticmethod
     def init_db(app):

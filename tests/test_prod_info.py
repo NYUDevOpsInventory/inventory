@@ -143,6 +143,27 @@ class TestProductInformation(unittest.TestCase):
         self.assert_fields_equal(prod_info,
                 None, None, test_new_qty + test_restock_amt, None, None, None, None)
 
+    def test_automatic_restock_exception(self):
+        """ Test automatic_restock() when property is not initialized. """
+        # Missing 'restock_level'
+        prod_info = ProductInformation(prod_id=1, prod_name='Storm Trooper', \
+                new_qty=20, used_qty=30, open_boxed_qty=40, \
+                restock_amt=100)
+        self.assertRaises(DataValidationError, prod_info.automatic_restock)
+
+    def test_automatic_restock(self):
+        """ Test automatic restocking functionality """
+        prod_info = ProductInformation(prod_id=1, prod_name='Storm Trooper', \
+                new_qty=20, used_qty=30, open_boxed_qty=40, \
+                restock_level=1000, restock_amt=100)
+        prod_info.save()
+
+        retrived_prod_info = ProductInformation.find(prod_id=1)
+        self.assertIsNotNone(retrived_prod_info)
+        total_qty = retrived_prod_info.new_qty + retrived_prod_info.used_qty \
+                + retrived_prod_info.open_boxed_qty
+        self.assertEqual(total_qty, 1090)
+
     def test_serialize_prod_info(self):
         test_prod_id = 911
         test_prod_name = "nebula"
@@ -218,43 +239,6 @@ class TestProductInformation(unittest.TestCase):
         # Optional fields contain values smaller than defaults.
         prod_info = ProductInformation(prod_name = "ert", new_qty = -1, used_qty = -1, open_boxed_qty = -1, restock_level = -2, restock_amt = -1)
         self.assertRaises(DataValidationError, prod_info.deserialize_update, data)
-
-    def test_restock_exception(self):
-        """ 
-        Test restock() when property is not initialized.
-        """
-        # Missing 'restock_level'
-        prod_info = ProductInformation(prod_id=1, prod_name='Storm Trooper', \
-                new_qty=20, used_qty=30, open_boxed_qty=40, \
-                restock_amt=100)
-        self.assertRaises(DataValidationError, prod_info.restock)
-
-    def test_restock(self):
-        """ Test restocking functionality. """
-        prod_info = ProductInformation(prod_id=1, prod_name='Storm Trooper', \
-                new_qty=20, used_qty=30, open_boxed_qty=40, \
-                restock_level=1000, restock_amt=100)
-
-        # Training a clone army for the Republic.
-        prod_info.restock()
-
-        total_qty = prod_info.new_qty + prod_info.used_qty + prod_info.open_boxed_qty
-        self.assertEqual(total_qty, 1090)
-
-    def test_automatic_restock(self):
-        """ Test automatic restocking functionality """
-        prod_info = ProductInformation(prod_id=1, prod_name='Storm Trooper', \
-                new_qty=20, used_qty=30, open_boxed_qty=40, \
-                restock_level=1000, restock_amt=100)
-
-        prod_info.save()
-
-        retrived_prod_info = ProductInformation.find(prod_id=1)
-        self.assertIsNotNone(retrived_prod_info)
-        total_qty = retrived_prod_info.new_qty + retrived_prod_info.used_qty \
-                + retrived_prod_info.open_boxed_qty
-        self.assertEqual(total_qty, 1090)
-
 
 ######################################################################
 # Utility functions

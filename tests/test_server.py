@@ -63,6 +63,7 @@ class TestInventoryServer(unittest.TestCase):
         server.init_db()
         db.drop_all()
         db.create_all()
+        # automatic restock will be triggered when the 2 products are saved to database.
         ProductInformation(prod_id=1, prod_name='a', new_qty=1, used_qty=1, open_boxed_qty=1,
                 restock_level=10, restock_amt=10).save()
         ProductInformation(prod_id=2, prod_name='b', new_qty=2, used_qty=2, open_boxed_qty=2,
@@ -224,7 +225,8 @@ class TestInventoryServer(unittest.TestCase):
         response = self.app.put(PATH_RESTOCK.format(test_prod_id), data=data, content_type=JSON)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         return_json = json.loads(response.data)
-        self.assert_fields_equal(return_json, test_prod_id, 'a', 1 + test_restock_amt, 1, 1, 10, 10)
+        # automatic restocking was triggered before manual restocking.
+        self.assert_fields_equal(return_json, test_prod_id, 'a', 11 + test_restock_amt, 1, 1, 10, 10)
 
     def test_update_prod_info(self):
         """ Test update ProductionInformation """
