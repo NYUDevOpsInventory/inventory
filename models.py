@@ -123,12 +123,11 @@ class ProductInformation(db.Model):
         data_restock_amt = data.get(RESTOCK_AMT)
 
         # Ensure optional fields are not smaller than default values.
-        if (data_new_qty is not None and data_new_qty < DEFAULT_NEW_QTY) or \
-                (data_used_qty is not None and data_used_qty < DEFAULT_USED_QTY) or \
-                (data_open_boxed_qty is not None and data_open_boxed_qty < DEFAULT_OPEN_BOXED_QTY) \
-                or \
+        if (data_new_qty is not None and data_new_qty < 0) or \
+                (data_used_qty is not None and data_used_qty < 0) or \
+                (data_open_boxed_qty is not None and data_open_boxed_qty < 0) or \
                 (data_restock_level is not None and data_restock_level < DEFAULT_RESTOCK_LEVEL) or \
-                (data_restock_amt is not None and data_restock_amt < DEFALUT_RESTOCK_AMT):
+                (data_restock_amt is not None and data_restock_amt < 0):
             raise DataValidationError(BAD_DATA_MSG)
 
         # populate ProductInformation with given data or None
@@ -152,14 +151,18 @@ class ProductInformation(db.Model):
 
         return self
 
-    def deserialize_update(self, data, initialize_property=True):
+    def restock(self, amt):
+        if (self.new_qty is None):
+            raise DataValidationError(BAD_DATA_MSG)
+        self.new_qty += amt
+        return self
+
+    def deserialize_update(self, data):
         """
         Deserializes an ProductInformation from a dictionary.
 
         Args:
             data (dict): A dictionary containing the ProductInformation data
-            initialize_property (bool): A boolean indicating whether to
-                initialize the ProductInformation properties to default value.
         """
         if not isinstance(data, dict):
             raise DataValidationError(BAD_DATA_MSG)
@@ -175,12 +178,12 @@ class ProductInformation(db.Model):
         data_restock_amt = data.get(RESTOCK_AMT)
 
         # Ensure optional fields are not smaller than default values.
-        if (data_new_qty is not None and data_new_qty < DEFAULT_NEW_QTY) or \
-                (data_used_qty is not None and data_used_qty < DEFAULT_USED_QTY) or \
-                (data_open_boxed_qty is not None and data_open_boxed_qty < DEFAULT_OPEN_BOXED_QTY) \
+        if (data_new_qty is not None and data_new_qty < 0) or \
+                (data_used_qty is not None and data_used_qty < 0) or \
+                (data_open_boxed_qty is not None and data_open_boxed_qty < 0) \
                 or \
                 (data_restock_level is not None and data_restock_level < DEFAULT_RESTOCK_LEVEL) or \
-                (data_restock_amt is not None and data_restock_amt < DEFALUT_RESTOCK_AMT):
+                (data_restock_amt is not None and data_restock_amt < 0):
             raise DataValidationError(BAD_DATA_MSG)
 
         # update ProductInformation only if necessary data is provided

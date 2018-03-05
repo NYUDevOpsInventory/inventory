@@ -36,6 +36,8 @@ DEFALUT_RESTOCK_AMT = 0
 # API paths
 PATH_INVENTORY = '/inventory'
 PATH_INVENTORY_PROD_ID = '/inventory/{}'
+# Action paths
+PATH_RESTOCK = '/inventory/{}/restock'
 # Content type
 JSON = 'application/json'
 # Location header
@@ -148,6 +150,19 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(entry_count + 1, len(data))
         self.assertIn(return_json, data)
 
+    def test_read_prod_info(self):
+        """ Read a product information """
+        # Test reading a non-exist product infomation
+        response = self.app.get(PATH_INVENTORY_PROD_ID.format(666))
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+
+        # Test reading an exist product infomation
+        response = self.app.get(PATH_INVENTORY_PROD_ID.format(1))
+        data = json.loads(response.data)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(data[PROD_ID], 1)
+        self.assertEqual(data[PROD_NAME], 'a')
+
     def test_delete_prod_info(self):
         """ Deleting product information. """
         entry_count = self.get_entry_count()
@@ -179,7 +194,37 @@ class TestInventoryServer(unittest.TestCase):
         response = self.app.delete(PATH_INVENTORY_PROD_ID.format(2), content_type=JSON)
         response = self.app.get(PATH_INVENTORY)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual("Inventory is empty.", response.data)        
+        self.assertEqual("Inventory is empty.", response.data)
+
+    def test_restock_action(self):
+        # Test restocking a non-existing product.
+        response = self.app.put(PATH_RESTOCK.format(3), data=json.dumps({RESTOCK_AMT: 43}),
+                content_type=JSON)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+
+        # Test restocking an existing product information given empty input json data.
+        response = self.app.put(PATH_RESTOCK.format(1), data=json.dumps({}), content_type=JSON)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+        # Test restocking an existing product information given input data more than restock_amt.
+        response = self.app.put(PATH_RESTOCK.format(1),
+                data=json.dumps({PROD_NAME: "iririr", RESTOCK_AMT: 43, OPEN_BOXED_QTY: 79}), 
+                content_type=JSON)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+        # Test restock given a negative restock_amt.
+        response = self.app.put(PATH_RESTOCK.format(1), data=json.dumps({RESTOCK_AMT: -43}),
+                content_type=JSON)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+        # Test restocking an existing product with only restock_amt given.
+        test_prod_id = 1
+        test_restock_amt = 82
+        data = json.dumps({RESTOCK_AMT: test_restock_amt})
+        response = self.app.put(PATH_RESTOCK.format(test_prod_id), data=data, content_type=JSON)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        return_json = json.loads(response.data)
+        self.assert_fields_equal(return_json, test_prod_id, 'a', 1 + test_restock_amt, 1, 1, 10, 10)
 
     def test_update_prod_info(self):
         """ Test update ProductionInformation """
