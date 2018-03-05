@@ -39,6 +39,7 @@ PATH_INVENTORY_PROD_ID = '/inventory/{}'
 PATH_INVENTORY_QUERY_BY_PROD_NAME = '/inventory?prod_name={}'
 PATH_INVENTORY_QUERY_BY_QUANTITY = '/inventory?quantity={}'
 PATH_INVENTORY_QUERY_BY_CONDITION = '/inventory?condition={}'
+PATH_RESTOCK = '/inventory/{}/restock'
 # Content type
 JSON = 'application/json'
 # Location header
@@ -64,6 +65,7 @@ class TestInventoryServer(unittest.TestCase):
         server.init_db()
         db.drop_all()
         db.create_all()
+        # automatic restock will be triggered when the 2 products are saved to database.
         ProductInformation(prod_id=1, prod_name='a', new_qty=1, used_qty=1, open_boxed_qty=1,
                 restock_level=10, restock_amt=10).save()
         ProductInformation(prod_id=2, prod_name='b', new_qty=2, used_qty=2, open_boxed_qty=2,
@@ -151,6 +153,19 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(entry_count + 1, len(data))
         self.assertIn(return_json, data)
 
+    def test_read_prod_info(self):
+        """ Read a product information """
+        # Test reading a non-exist product infomation
+        response = self.app.get(PATH_INVENTORY_PROD_ID.format(666))
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+
+        # Test reading an exist product infomation
+        response = self.app.get(PATH_INVENTORY_PROD_ID.format(1))
+        data = json.loads(response.data)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(data[PROD_ID], 1)
+        self.assertEqual(data[PROD_NAME], 'a')
+
     def test_delete_prod_info(self):
         """ Deleting product information. """
         entry_count = self.get_entry_count()
@@ -173,8 +188,9 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = json.loads(response.data)
         self.assertEqual(2, len(data))
-        self.assert_fields_equal(data[0], 1, 'a', 1, 1, 1, 10, 10)
-        self.assert_fields_equal(data[1], 2, 'b', 2, 2, 2, 20, 20)
+        # new_qty changed due to automatic restocking.
+        self.assert_fields_equal(data[0], 1, 'a', 11, 1, 1, 10, 10)
+        self.assert_fields_equal(data[1], 2, 'b', 22, 2, 2, 20, 20)
 
         # should return a message when table is empty
         response = self.app.delete(PATH_INVENTORY_PROD_ID.format(1), content_type=JSON)
@@ -183,23 +199,55 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('No Inventory is found.', response.data)
 
-    def test_update_prof_info(self):
+    def test_restock_action(self):
+        # Test restocking a non-existing product.
+        response = self.app.put(PATH_RESTOCK.format(3), data=json.dumps({RESTOCK_AMT: 43}),
+                content_type=JSON)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
-        #Test updating existing prod_id
+        # Test restocking an existing product information given empty input json data.
+        response = self.app.put(PATH_RESTOCK.format(1), data=json.dumps({}), content_type=JSON)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+        # Test restocking an existing product information given input data more than restock_amt.
+        response = self.app.put(PATH_RESTOCK.format(1),
+                data=json.dumps({PROD_NAME: "iririr", RESTOCK_AMT: 43, OPEN_BOXED_QTY: 79}), 
+                content_type=JSON)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+        # Test restock given a negative restock_amt.
+        response = self.app.put(PATH_RESTOCK.format(1), data=json.dumps({RESTOCK_AMT: -43}),
+                content_type=JSON)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+        # Test restocking an existing product with only restock_amt given.
         test_prod_id = 1
-        data = json.dumps({PROD_NAME :'zen',NEW_QTY :3,RESTOCK_AMT: 7})
-        response = self.app.put(PATH_INVENTORY_PROD_ID.format(test_prod_id),data= data, content_type=JSON)
+        test_restock_amt = 82
+        data = json.dumps({RESTOCK_AMT: test_restock_amt})
+        response = self.app.put(PATH_RESTOCK.format(test_prod_id), data=data, content_type=JSON)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        return_json = json.loads(response.data)
+        # automatic restocking was triggered before manual restocking.
+        self.assert_fields_equal(return_json, test_prod_id, 'a', 11 + test_restock_amt, 1, 1, 10, 10)
+
+    def test_update_prod_info(self):
+        """ Test update ProductionInformation """
+        # Test updating existing prod_id
+        test_prod_id = 1
+        data = json.dumps({PROD_NAME: 'zen', NEW_QTY: 3, RESTOCK_AMT: 7})
+        response = self.app.put(PATH_INVENTORY_PROD_ID.format(test_prod_id), data=data, content_type=JSON)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         new_json = json.loads(response.data)
-        self.assertEqual(new_json['prod_id'],1)
+        self.assertEqual(new_json['prod_id'], 1)
         self.assertEqual(new_json['prod_name'], 'zen')
-        self.assertEqual(new_json['new_qty'], 3)
-        self.assertEqual(new_json['restock_amt'],7)
+        # new_qty = 3 + 7 = 10 due to automatic restocking
+        self.assertEqual(new_json['new_qty'], 10)
+        self.assertEqual(new_json['restock_amt'], 7)
 
-        #Test updating non-exisiting prod_id
+        # Test updating non-exisiting prod_id
         test_prod_id = 8
-        data = json.dumps({PROD_NAME :'zen',NEW_QTY :3,RESTOCK_AMT : 7})
-        response = self.app.put(PATH_INVENTORY_PROD_ID.format(test_prod_id),data= data, content_type=JSON)
+        data = json.dumps({PROD_NAME: 'zen', NEW_QTY: 3, RESTOCK_AMT: 7})
+        response = self.app.put(PATH_INVENTORY_PROD_ID.format(test_prod_id), data=data, content_type=JSON)
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
     def test_query_by_prod_name(self):

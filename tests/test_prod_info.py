@@ -128,6 +128,41 @@ class TestProductInformation(unittest.TestCase):
         prod_info = ProductInformation(prod_id = 1, prod_name = "ert", new_qty = -1, used_qty = -1, open_boxed_qty = -1, restock_level = -2, restock_amt = -1)
         self.assertRaises(DataValidationError, prod_info.deserialize, data)
 
+    def test_restock(self):
+        prod_info = ProductInformation()
+
+        # when new_qty is None.
+        test_restock_amt = 19
+        self.assertRaises(DataValidationError, prod_info.restock, test_restock_amt)
+
+        # wwhen new_qty is not None.
+        test_new_qty = 3
+        prod_info.new_qty = test_new_qty
+        prod_info.restock(test_restock_amt) 
+        self.assertIsNotNone(prod_info)
+        self.assert_fields_equal(prod_info,
+                None, None, test_new_qty + test_restock_amt, None, None, None, None)
+
+    def test_automatic_restock_exception(self):
+        """ Test automatic_restock() when property is not initialized. """
+        # Missing 'restock_level'
+        prod_info = ProductInformation(prod_id=1, prod_name='Storm Trooper', \
+                new_qty=20, used_qty=30, open_boxed_qty=40, \
+                restock_amt=100)
+        self.assertRaises(DataValidationError, prod_info.automatic_restock)
+
+    def test_automatic_restock(self):
+        """ Test automatic restocking functionality """
+        prod_info = ProductInformation(prod_id=1, prod_name='Storm Trooper', \
+                new_qty=20, used_qty=30, open_boxed_qty=40, \
+                restock_level=1000, restock_amt=100)
+        prod_info.save()
+
+        retrived_prod_info = ProductInformation.find(prod_id=1)
+        self.assertIsNotNone(retrived_prod_info)
+        total_qty = retrived_prod_info.new_qty + retrived_prod_info.used_qty \
+                + retrived_prod_info.open_boxed_qty
+        self.assertEqual(total_qty, 1090)
 
     def test_serialize_prod_info(self):
         test_prod_id = 911
