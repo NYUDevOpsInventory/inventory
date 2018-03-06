@@ -34,6 +34,7 @@ DEFAULT_OPEN_BOXED_QTY = 0
 DEFAULT_RESTOCK_LEVEL = -1
 DEFALUT_RESTOCK_AMT = 0
 # API paths
+PATH_ROOT = '/'
 PATH_INVENTORY = '/inventory'
 PATH_INVENTORY_PROD_ID = '/inventory/{}'
 PATH_INVENTORY_QUERY_BY_PROD_NAME = '/inventory?prod_name={}'
@@ -53,7 +54,7 @@ class TestInventoryServer(unittest.TestCase):
     def setUpClass(cls):
         """ Run once before all tests """
         server.app.debug = False
-        #server.initialize_logging(logging.INFO)
+        server.initialize_logging(logging.INFO)
         server.app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 
     @classmethod
@@ -75,6 +76,11 @@ class TestInventoryServer(unittest.TestCase):
     def tearDown(self):
         db.session.remove()
         db.drop_all()
+
+    def test_root(self):
+        """ Test if the root url is accessible. """
+        response = self.app.get(PATH_ROOT)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
 
     def test_create_prod_info_bad_request(self):
         """ Test cases where not all mandatory fields are given. """
