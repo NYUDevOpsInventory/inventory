@@ -1,7 +1,7 @@
 """
 Inverntory Management System Service
 """
-
+from __future__ import print_function
 from flask import Flask, jsonify, url_for, make_response, request, abort
 from flask_api import status
 from models import DataValidationError, ProductInformation
@@ -39,7 +39,8 @@ CANNOT_CREATE_MSG = "Product with id '{}' already existed. Cannot create new pro
 INVALID_CONTENT_TYPE_MSG = 'Content-Type must be {}'
 METHOD_NOT_ALLOWED_MSG = 'Your request method is not supported.' \
                    ' Check your HTTP method and try again.'
-NOT_FOUND_MSG = "Product with id '{}' was not found in Inventory."
+NOT_FOUND_MSG = "Product with id '{}' was not found in Inventory"
+INVALID_PARAMETER_MSG = 'Your request contains invalid parameters. Please check your request and try again.'
 # Content type
 CONTENT_TYPE = 'Content-Type'
 JSON = 'application/json'
@@ -59,15 +60,16 @@ app.config['LOGGING_LEVEL'] = logging.INFO
 @app.errorhandler(DataValidationError)
 def request_validation_error(error):
     """ Handles all data validation issues from the model """
-    return bad_request(error)
+    app.logger.info(error.message)
+    return jsonify(status = status.HTTP_400_BAD_REQUEST, error = BAD_REQUEST_ERROR,
+            message = error.message), status.HTTP_400_BAD_REQUEST
 
 @app.errorhandler(status.HTTP_400_BAD_REQUEST)
 def bad_request(error):
     """ Handles requests that have bad or malformed data """
-    message = error.message or str(error)
-    app.logger.info(message)
+    app.logger.info(str(error))
     return jsonify(status = status.HTTP_400_BAD_REQUEST, error = BAD_REQUEST_ERROR,
-            message = error.message), status.HTTP_400_BAD_REQUEST
+            message = error.description), status.HTTP_400_BAD_REQUEST
 
 @app.errorhandler(status.HTTP_404_NOT_FOUND)
 def not_found(error):
@@ -115,12 +117,33 @@ def index():
     ), status.HTTP_200_OK
 
 @app.route(PATH_INVENTORY, methods=[GET])
-def list_all_prod_info():
-    """ Return all entries in the Inventory system """
-    all_prod_info = ProductInformation.list_all()
+def query_prod_info():
+    """ Query specific entries in the Inventory system """
+    all_prod_info = []
+    if request.args.get('prod_name'):
+        prod_name = request.args.get('prod_name')
+        all_prod_info = ProductInformation.find_by_name(prod_name)
+    elif request.args.get('quantity'):
+        quantity = request.args.get('quantity')
+        try:
+            quantity = int(quantity)
+            all_prod_info = ProductInformation.find_by_quantity(quantity)
+        except ValueError:
+            abort(status.HTTP_400_BAD_REQUEST, INVALID_PARAMETER_MSG)
+    elif request.args.get('condition'):
+        condition = request.args.get('condition')
+        if condition in ['new', 'used', 'open-boxed']:
+            all_prod_info = ProductInformation.find_by_condition(condition)
+        else:
+            abort(status.HTTP_400_BAD_REQUEST, INVALID_PARAMETER_MSG)
+    elif len(request.args) == 0:
+        all_prod_info = ProductInformation.list_all()
+    else:
+        abort(status.HTTP_400_BAD_REQUEST, INVALID_PARAMETER_MSG)
+
     if (len(all_prod_info) == 0):
-        return make_response('Inventory is empty.', status.HTTP_200_OK)
-    results = [prod_info.serialize() for prod_info in ProductInformation.list_all()]
+        return make_response('No Inventory is found.', status.HTTP_200_OK)
+    results = [prod_info.serialize() for prod_info in all_prod_info]
     return jsonify(results), status.HTTP_200_OK
 
 @app.route(PATH_INVENTORY_PROD_ID, methods=[GET])
@@ -223,7 +246,7 @@ def check_content_type(content_type):
 def initialize_logging(log_level=logging.INFO):
     """ Initialized the default logging to STDOUT """
     if not app.debug:
-        print ("Setting up logging...")
+        print("Setting up logging...")
         # Set up default logging for submodules to use STDOUT
         # datefmt='%m/%d/%Y %I:%M:%S %p'
         fmt = '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
