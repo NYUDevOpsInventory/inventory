@@ -81,22 +81,6 @@ def not_found(error):
     return jsonify(status=status.HTTP_404_NOT_FOUND, error=NOT_FOUND_ERROR,
                    message=error.message), status.HTTP_404_NOT_FOUND
 
-@app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED)
-def method_not_supported(error):
-    """ Handles bad method calls """
-    message = error.message or str(error)
-    app.logger.info(message)
-    return jsonify(status=status.HTTP_405_METHOD_NOT_ALLOWED, error=METHOD_NOT_ALLOWED_ERROR,
-                   message=METHOD_NOT_ALLOWED_MSG), status.HTTP_405_METHOD_NOT_ALLOWED
-
-@app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
-def internal_server_error(error):
-    """ Handles catostrophic errors """
-    message = error.message or str(error)
-    app.logger.info(message)
-    return jsonify(status=status.HTTP_500_INTERNAL_SERVER_ERROR, error=INTERNAL_SERVER_ERROR,
-                   message=error.message), status.HTTP_500_INTERNAL_SERVER_ERROR
-
 ######################################################################
 # API placeholder
 ######################################################################
