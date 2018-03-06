@@ -1,14 +1,15 @@
 """
 Inverntory Management System Service
 """
+
 from __future__ import print_function
-from flask import Flask, jsonify, url_for, make_response, request, abort
+import logging
+import os
+import sys
+from flask import abort, Flask, jsonify, make_response, request, url_for
 from flask_api import status
 from models import DataValidationError, ProductInformation
 from werkzeug.exceptions import BadRequest, NotFound
-import os
-import logging
-import sys
 
 ######################################################################
 #  Fixed Global Variables
@@ -38,9 +39,10 @@ CANNOT_CREATE_MSG = "Product with id '{}' already existed. Cannot create new pro
         "information with the same prod_id."
 INVALID_CONTENT_TYPE_MSG = 'Content-Type must be {}'
 METHOD_NOT_ALLOWED_MSG = 'Your request method is not supported.' \
-                   ' Check your HTTP method and try again.'
+        ' Check your HTTP method and try again.'
 NOT_FOUND_MSG = "Product with id '{}' was not found in Inventory"
-INVALID_PARAMETER_MSG = 'Your request contains invalid parameters. Please check your request and try again.'
+INVALID_PARAMETER_MSG = 'Your request contains invalid parameters. ' \
+        'Please check your request and try again.'
 # Content type
 CONTENT_TYPE = 'Content-Type'
 JSON = 'application/json'
@@ -61,23 +63,23 @@ app.config['LOGGING_LEVEL'] = logging.INFO
 def request_validation_error(error):
     """ Handles all data validation issues from the model """
     app.logger.info(error.message)
-    return jsonify(status = status.HTTP_400_BAD_REQUEST, error = BAD_REQUEST_ERROR,
-            message = error.message), status.HTTP_400_BAD_REQUEST
+    return jsonify(status=status.HTTP_400_BAD_REQUEST, error=BAD_REQUEST_ERROR,
+                   message=error.message), status.HTTP_400_BAD_REQUEST
 
 @app.errorhandler(status.HTTP_400_BAD_REQUEST)
 def bad_request(error):
     """ Handles requests that have bad or malformed data """
     app.logger.info(str(error))
-    return jsonify(status = status.HTTP_400_BAD_REQUEST, error = BAD_REQUEST_ERROR,
-            message = error.description), status.HTTP_400_BAD_REQUEST
+    return jsonify(status=status.HTTP_400_BAD_REQUEST, error=BAD_REQUEST_ERROR,
+                   message=error.description), status.HTTP_400_BAD_REQUEST
 
 @app.errorhandler(status.HTTP_404_NOT_FOUND)
 def not_found(error):
     """ Handles product information that cannot be found """
     message = error.message or str(error)
     app.logger.info(message)
-    return jsonify(status = status.HTTP_404_NOT_FOUND, error = NOT_FOUND_ERROR,
-            message = error.message), status.HTTP_404_NOT_FOUND
+    return jsonify(status=status.HTTP_404_NOT_FOUND, error=NOT_FOUND_ERROR,
+                   message=error.message), status.HTTP_404_NOT_FOUND
 
 ######################################################################
 # API placeholder
@@ -120,12 +122,12 @@ def query_prod_info():
             all_prod_info = ProductInformation.find_by_condition(condition)
         else:
             abort(status.HTTP_400_BAD_REQUEST, INVALID_PARAMETER_MSG)
-    elif len(request.args) == 0:
+    elif not request.args:
         all_prod_info = ProductInformation.list_all()
     else:
         abort(status.HTTP_400_BAD_REQUEST, INVALID_PARAMETER_MSG)
 
-    if (len(all_prod_info) == 0):
+    if not all_prod_info:
         return make_response('No Inventory is found.', status.HTTP_200_OK)
     results = [prod_info.serialize() for prod_info in all_prod_info]
     return jsonify(results), status.HTTP_200_OK
@@ -148,16 +150,16 @@ def create_prod_info():
     prod_info = ProductInformation()
     prod_info.deserialize(request.get_json())
 
-    if (ProductInformation.find(prod_info.prod_id)):
+    if ProductInformation.find(prod_info.prod_id):
         raise BadRequest(CANNOT_CREATE_MSG.format(prod_info.prod_id))
 
     prod_info.save()
     message = prod_info.serialize()
     location_url = url_for(GET_PROD_INFO, prod_id=prod_info.prod_id, _external=True)
     return make_response(jsonify(message), status.HTTP_201_CREATED,
-            {
-                LOCATION: location_url
-            })
+                         {
+                             LOCATION: location_url
+                         })
 
 @app.route(PATH_INVENTORY_PROD_ID, methods=[DELETE])
 def delete_prod_info(prod_id):

@@ -21,8 +21,8 @@ restock_amt     (int)       - the amount of new products restocked
 
 """
 
-from flask_sqlalchemy import SQLAlchemy
 import math
+from flask_sqlalchemy import SQLAlchemy
 
 # Default ProductInformation property value
 DEFAULT_NEW_QTY = 0
@@ -154,7 +154,11 @@ class ProductInformation(db.Model):
         return self
 
     def restock(self, amt):
-        if (self.new_qty is None):
+        """
+        Add 'amt' of products to this ProductInfo's new_qty.
+        Created for manual restock action.
+        """
+        if self.new_qty is None:
             raise DataValidationError(BAD_DATA_MSG)
         self.new_qty += amt
         return self

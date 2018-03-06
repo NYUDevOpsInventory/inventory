@@ -6,10 +6,10 @@ Test cases can be run with:
     coverage report -m
 """
 
-from models import db, DataValidationError, ProductInformation
-from server import app
 import os
 import unittest
+from models import db, DataValidationError, ProductInformation
+from server import app
 
 # Default ProductInformation property value
 DEFAULT_NEW_QTY = 0
@@ -58,10 +58,10 @@ class TestProductInformation(unittest.TestCase):
         # Test with only mandatory fields.
         test_prod_id = 1
         test_prod_name = "asdf"
-        prod_info = ProductInformation(prod_id = test_prod_id, prod_name = test_prod_name)
+        prod_info = ProductInformation(prod_id=test_prod_id, prod_name=test_prod_name)
         self.assertIsNotNone(prod_info)
         self.assert_fields_equal(prod_info, test_prod_id, test_prod_name,
-                None, None, None, None, None)
+                                 None, None, None, None, None)
 
         # Test with all fields.
         test_prod_id = 10
@@ -72,13 +72,13 @@ class TestProductInformation(unittest.TestCase):
         test_restock_level = 5
         test_restock_amt = 6
 
-        prod_info = ProductInformation(prod_id = test_prod_id, prod_name = test_prod_name,
-                new_qty = test_new_qty, used_qty = test_used_qty,
-                open_boxed_qty = test_open_boxed_qty, restock_level = test_restock_level,
-                restock_amt = test_restock_amt)
+        prod_info = ProductInformation(prod_id=test_prod_id, prod_name=test_prod_name,
+                                       new_qty=test_new_qty, used_qty=test_used_qty,
+                                       open_boxed_qty=test_open_boxed_qty, restock_level=test_restock_level,
+                                       restock_amt=test_restock_amt)
         self.assertIsNotNone(prod_info)
         self.assert_fields_equal(prod_info, test_prod_id, test_prod_name, test_new_qty,
-                test_used_qty, test_open_boxed_qty, test_restock_level, test_restock_amt)
+                                 test_used_qty, test_open_boxed_qty, test_restock_level, test_restock_amt)
 
     def test_create_prod_info(self):
         """ Create a new prodct information and add it to the data table """
@@ -87,18 +87,18 @@ class TestProductInformation(unittest.TestCase):
 
         test_prod_id = 11
         test_prod_name = "a"
-        prod_info = ProductInformation(prod_id = test_prod_id, prod_name = test_prod_name)
+        prod_info = ProductInformation(prod_id=test_prod_id, prod_name=test_prod_name)
         prod_info.save()
         prod_infos = ProductInformation.list_all()
 
         self.assertEqual(1, len(prod_infos))
         self.assertIsNotNone(prod_infos[0])
         self.assert_fields_equal(prod_infos[0], test_prod_id, test_prod_name,
-                None, None, None, None, None)
+                                 None, None, None, None, None)
 
     def test_delete_prod_info(self):
         """ Delete a product information """
-        prod_info = ProductInformation(prod_id = 110, prod_name = "qwe")
+        prod_info = ProductInformation(prod_id=110, prod_name="qwe")
         prod_info.save()
         self.assertEqual(1, len(ProductInformation.list_all()))
         prod_info.delete()
@@ -113,8 +113,8 @@ class TestProductInformation(unittest.TestCase):
         prod_info.deserialize(data)
         self.assertIsNotNone(prod_info)
         self.assert_fields_equal(prod_info, test_prod_id, test_prod_name,
-                DEFAULT_NEW_QTY, DEFAULT_USED_QTY, DEFAULT_OPEN_BOXED_QTY,
-                DEFAULT_RESTOCK_LEVEL, DEFALUT_RESTOCK_AMT)
+                                 DEFAULT_NEW_QTY, DEFAULT_USED_QTY, DEFAULT_OPEN_BOXED_QTY,
+                                 DEFAULT_RESTOCK_LEVEL, DEFALUT_RESTOCK_AMT)
 
     def test_deserialize_bad_data(self):
         """ Test deserialization of bad data. """
@@ -125,10 +125,13 @@ class TestProductInformation(unittest.TestCase):
         self.assertRaises(DataValidationError, prod_info.deserialize, data)
 
         # Optional fields contain values smaller than defaults.
-        prod_info = ProductInformation(prod_id = 1, prod_name = "ert", new_qty = -1, used_qty = -1, open_boxed_qty = -1, restock_level = -2, restock_amt = -1)
+        prod_info = ProductInformation(prod_id=1, prod_name="ert",
+                                       new_qty=-1, used_qty=-1, open_boxed_qty=-1,
+                                       restock_level=-2, restock_amt=-1)
         self.assertRaises(DataValidationError, prod_info.deserialize, data)
 
     def test_restock(self):
+        """ Test manual restocking function. """
         prod_info = ProductInformation()
 
         # when new_qty is None.
@@ -138,24 +141,24 @@ class TestProductInformation(unittest.TestCase):
         # wwhen new_qty is not None.
         test_new_qty = 3
         prod_info.new_qty = test_new_qty
-        prod_info.restock(test_restock_amt) 
+        prod_info.restock(test_restock_amt)
         self.assertIsNotNone(prod_info)
-        self.assert_fields_equal(prod_info,
-                None, None, test_new_qty + test_restock_amt, None, None, None, None)
+        self.assert_fields_equal(prod_info, None, None, test_new_qty + test_restock_amt,
+                                 None, None, None, None)
 
     def test_automatic_restock_exception(self):
         """ Test automatic_restock() when property is not initialized. """
         # Missing 'restock_level'
         prod_info = ProductInformation(prod_id=1, prod_name='Storm Trooper', \
-                new_qty=20, used_qty=30, open_boxed_qty=40, \
-                restock_amt=100)
+                                       new_qty=20, used_qty=30, open_boxed_qty=40, \
+                                       restock_amt=100)
         self.assertRaises(DataValidationError, prod_info.automatic_restock)
 
     def test_automatic_restock(self):
         """ Test automatic restocking functionality """
         prod_info = ProductInformation(prod_id=1, prod_name='Storm Trooper', \
-                new_qty=20, used_qty=30, open_boxed_qty=40, \
-                restock_level=1000, restock_amt=100)
+                                       new_qty=20, used_qty=30, open_boxed_qty=40, \
+                                       restock_level=1000, restock_amt=100)
         prod_info.save()
 
         retrived_prod_info = ProductInformation.find(prod_id=1)
@@ -165,9 +168,10 @@ class TestProductInformation(unittest.TestCase):
         self.assertEqual(total_qty, 1090)
 
     def test_serialize_prod_info(self):
+        """ Test serialize() function """
         test_prod_id = 911
         test_prod_name = "nebula"
-        prod_info = ProductInformation(prod_id = test_prod_id, prod_name = test_prod_name)
+        prod_info = ProductInformation(prod_id=test_prod_id, prod_name=test_prod_name)
         data = prod_info.serialize()
 
         self.assertIsNotNone(data)
@@ -190,7 +194,7 @@ class TestProductInformation(unittest.TestCase):
         """ Update a product information. """
         test_prod_id = 111
         test_prod_name = "ab"
-        prod_info = ProductInformation(prod_id = test_prod_id, prod_name = test_prod_name)
+        prod_info = ProductInformation(prod_id=test_prod_id, prod_name=test_prod_name)
         prod_info.save()
 
         # update
@@ -209,35 +213,36 @@ class TestProductInformation(unittest.TestCase):
         self.assertEqual(1, len(prod_infos))
         self.assertIsNotNone(prod_infos[0])
         self.assert_fields_equal(prod_infos[0], test_prod_id, test_prod_name, test_new_qty,
-                test_used_qty, test_open_boxed_qty, test_restock_level, test_restock_amt)
+                                 test_used_qty, test_open_boxed_qty, test_restock_level, test_restock_amt)
 
     def test_deserialize_update_prod_info(self):
         """ Test deserialization while updating product information. """
         #create entry in order check deserialization
         test_prod_id = 1
         test_prod_name = "asdf"
-        prod_info = ProductInformation(prod_id = test_prod_id, prod_name = test_prod_name)
+        prod_info = ProductInformation(prod_id=test_prod_id, prod_name=test_prod_name)
         self.assertIsNotNone(prod_info)
         self.assert_fields_equal(prod_info, test_prod_id, test_prod_name,
-                None, None, None, None, None)
+                                 None, None, None, None, None)
 
         #test deserialize_update when
         test_prod_name = "fire"
-        data = {PROD_NAME: test_prod_name,RESTOCK_AMT : 5}
+        data = {PROD_NAME: test_prod_name, RESTOCK_AMT: 5}
         prod_info.deserialize_update(data)
         self.assertIsNotNone(prod_info)
         self.assert_fields_equal(prod_info, test_prod_id, test_prod_name,
-                None, None, None, None, 5)
+                                 None, None, None, None, 5)
 
         #test deserilaize_update when prod_id is provided
         update_prod_id = 3
         test_prod_name = "fire"
-        data = {PROD_ID: update_prod_id,PROD_NAME: test_prod_name,RESTOCK_AMT : 5}
+        data = {PROD_ID: update_prod_id, PROD_NAME: test_prod_name, RESTOCK_AMT: 5}
         prod_info = ProductInformation()
         self.assertRaises(DataValidationError, prod_info.deserialize_update, data)
 
         # Optional fields contain values smaller than defaults.
-        prod_info = ProductInformation(prod_name = "ert", new_qty = -1, used_qty = -1, open_boxed_qty = -1, restock_level = -2, restock_amt = -1)
+        prod_info = ProductInformation(prod_name="ert", new_qty=-1, used_qty=-1, open_boxed_qty=-1,
+                                       restock_level=-2, restock_amt=-1)
         self.assertRaises(DataValidationError, prod_info.deserialize_update, data)
 
     def test_find_by_name(self):
@@ -294,7 +299,8 @@ class TestProductInformation(unittest.TestCase):
 # Utility functions
 ######################################################################
     def assert_fields_equal(self, prod_info, expect_prod_id, expect_prod_name, expect_new_qty,
-            expect_used_qty, expect_open_boxed_qty, expect_restock_level, expect_restock_amt):
+                            expect_used_qty, expect_open_boxed_qty, expect_restock_level, expect_restock_amt):
+        """ Utility function for checking if fields are equal """
         self.assertEqual(expect_prod_id, prod_info.prod_id)
         self.assertEqual(expect_prod_name, prod_info.prod_name)
         self.assertEqual(expect_new_qty, prod_info.new_qty)
