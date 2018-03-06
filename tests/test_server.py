@@ -6,6 +6,7 @@ Test cases can be run with the following:
   coverage report -m
 """
 
+import logging
 import json
 import os
 import unittest
