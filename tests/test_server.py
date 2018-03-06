@@ -6,14 +6,12 @@ Test cases can be run with the following:
   coverage report -m
 """
 
-from flask_api import status
-from mock import MagicMock, patch
-from models import ProductInformation, DataValidationError, db
 import json
-import logging
 import os
-import server
 import unittest
+import server
+from flask_api import status
+from models import ProductInformation, db
 
 ######################################################################
 #  Fixed Global Variables
@@ -49,6 +47,7 @@ LOCATION = 'Location'
 #  Test Cases
 ######################################################################
 class TestInventoryServer(unittest.TestCase):
+    """ Unit test for server.py """
     @classmethod
     def setUpClass(cls):
         """ Run once before all tests """
@@ -67,9 +66,9 @@ class TestInventoryServer(unittest.TestCase):
         db.create_all()
         # automatic restock will be triggered when the 2 products are saved to database.
         ProductInformation(prod_id=1, prod_name='a', new_qty=1, used_qty=1, open_boxed_qty=1,
-                restock_level=10, restock_amt=10).save()
+                           restock_level=10, restock_amt=10).save()
         ProductInformation(prod_id=2, prod_name='b', new_qty=2, used_qty=2, open_boxed_qty=2,
-                restock_level=20, restock_amt=20).save()
+                           restock_level=20, restock_amt=20).save()
         self.app = server.app.test_client()
 
     def tearDown(self):
@@ -77,7 +76,8 @@ class TestInventoryServer(unittest.TestCase):
         db.drop_all()
 
     def test_create_prod_info_bad_request(self):
-        """ Test cases where not all mandatory fields are given. """
+        """ Test for create ProductInformation with bad request. """
+        # Test cases where not all mandatory fields are given.
         data = json.dumps({})
         response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
@@ -90,7 +90,7 @@ class TestInventoryServer(unittest.TestCase):
         response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
-        """ Test case for adding duplicate product information. """
+        # Test case for adding duplicate product information.
         test_prod_id = 100
         test_prod_name = 'asdf'
         data = json.dumps({PROD_ID: test_prod_id, PROD_NAME: test_prod_name})
@@ -115,8 +115,8 @@ class TestInventoryServer(unittest.TestCase):
         test_restock_level = 9
         test_restock_amt = 4
         data = json.dumps({PROD_ID: test_prod_id, PROD_NAME: test_prod_name,
-                    NEW_QTY: test_new_qty, USED_QTY: test_used_qty, OPEN_BOXED_QTY: test_open_qty,
-                    RESTOCK_LEVEL: test_restock_level, RESTOCK_AMT: test_restock_amt})
+                           NEW_QTY: test_new_qty, USED_QTY: test_used_qty, OPEN_BOXED_QTY: test_open_qty,
+                           RESTOCK_LEVEL: test_restock_level, RESTOCK_AMT: test_restock_amt})
         response = self.app.post(PATH_INVENTORY, data=data, content_type=JSON)
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
@@ -124,7 +124,7 @@ class TestInventoryServer(unittest.TestCase):
         return_json = json.loads(response.data)
         self.assertIsNotNone(return_json)
         self.assert_fields_equal(return_json, test_prod_id, test_prod_name, test_new_qty,
-                test_used_qty, test_open_qty, test_restock_level, test_restock_amt)
+                                 test_used_qty, test_open_qty, test_restock_level, test_restock_amt)
         response = self.app.get(PATH_INVENTORY)
         data = json.loads(response.data)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -145,8 +145,8 @@ class TestInventoryServer(unittest.TestCase):
         return_json = json.loads(response.data)
         self.assertIsNotNone(return_json)
         self.assert_fields_equal(return_json, test_prod_id, test_prod_name, DEFAULT_NEW_QTY,
-                DEFAULT_USED_QTY, DEFAULT_OPEN_BOXED_QTY, DEFAULT_RESTOCK_LEVEL,
-                DEFALUT_RESTOCK_AMT)
+                                 DEFAULT_USED_QTY, DEFAULT_OPEN_BOXED_QTY, DEFAULT_RESTOCK_LEVEL,
+                                 DEFALUT_RESTOCK_AMT)
         response = self.app.get(PATH_INVENTORY)
         data = json.loads(response.data)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -200,9 +200,10 @@ class TestInventoryServer(unittest.TestCase):
         self.assertEqual('No Inventory is found.', response.data)
 
     def test_restock_action(self):
+        """ Test manual restocking action. """
         # Test restocking a non-existing product.
         response = self.app.put(PATH_RESTOCK.format(3), data=json.dumps({RESTOCK_AMT: 43}),
-                content_type=JSON)
+                                content_type=JSON)
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
         # Test restocking an existing product information given empty input json data.
@@ -211,13 +212,13 @@ class TestInventoryServer(unittest.TestCase):
 
         # Test restocking an existing product information given input data more than restock_amt.
         response = self.app.put(PATH_RESTOCK.format(1),
-                data=json.dumps({PROD_NAME: "iririr", RESTOCK_AMT: 43, OPEN_BOXED_QTY: 79}),
-                content_type=JSON)
+                                data=json.dumps({PROD_NAME: "iririr", RESTOCK_AMT: 43, OPEN_BOXED_QTY: 79}),
+                                content_type=JSON)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
         # Test restock given a negative restock_amt.
         response = self.app.put(PATH_RESTOCK.format(1), data=json.dumps({RESTOCK_AMT: -43}),
-                content_type=JSON)
+                                content_type=JSON)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
         # Test restocking an existing product with only restock_amt given.
@@ -259,7 +260,7 @@ class TestInventoryServer(unittest.TestCase):
 
         response = self.app.get(PATH_INVENTORY_QUERY_BY_PROD_NAME.format("c"))
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assertTrue('No Inventory is found.', response.data)
+        self.assertEqual('No Inventory is found.', response.data)
 
     def test_query_by_quantity(self):
         """ Query by the total quantity """
@@ -278,7 +279,7 @@ class TestInventoryServer(unittest.TestCase):
 
         response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format(5))
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assertTrue('No Inventory is found.', response.data)
+        self.assertEqual('No Inventory is found.', response.data)
 
     def test_query_by_condition(self):
         """ Query by the product condition """
@@ -320,7 +321,8 @@ class TestInventoryServer(unittest.TestCase):
 # Utility functions
 ######################################################################
     def assert_fields_equal(self, return_json, expect_prod_id, expect_prod_name, expect_new_qty,
-            expect_used_qty, expect_open_qty, expect_restock_level, expect_restock_amt):
+                            expect_used_qty, expect_open_qty, expect_restock_level, expect_restock_amt):
+        """ Utility function for checking if fields are equal """
         self.assertEqual(expect_prod_id, return_json[PROD_ID])
         self.assertEqual(expect_prod_name, return_json[PROD_NAME])
         self.assertEqual(expect_new_qty, return_json[NEW_QTY])
