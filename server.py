@@ -10,7 +10,7 @@ import sys
 from flask import abort, Flask, jsonify, make_response, request, url_for
 from flask_api import status
 from models import DataValidationError, ProductInformation
-from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
+from werkzeug.exceptions import BadRequest, NotFound
 
 ######################################################################
 #  Fixed Global Variables
