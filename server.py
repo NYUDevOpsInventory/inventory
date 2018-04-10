@@ -22,12 +22,6 @@ DELETE = 'DELETE'
 GET = 'GET'
 POST = 'POST'
 PUT = 'PUT'
-# API paths
-PATH_ROOT = '/'
-PATH_INVENTORY = '/inventory'
-PATH_INVENTORY_PROD_ID = '/inventory/<int:prod_id>'
-# Action paths
-PATH_RESTOCK = '/inventory/<int:prod_id>/restock'
 # Errors
 BAD_REQUEST_ERROR = 'Bad Request.'
 INTERNAL_SERVER_ERROR = 'Internal Server Error'
@@ -84,7 +78,7 @@ def not_found(error):
 ######################################################################
 # API placeholder
 ######################################################################
-@app.route(PATH_ROOT)
+@app.route('/')
 def index():
     """ Return help information about the API """
     return jsonify(
@@ -102,7 +96,7 @@ def index():
         },
     ), status.HTTP_200_OK
 
-@app.route(PATH_INVENTORY, methods=[GET])
+@app.route('/inventory', methods=[GET])
 def query_prod_info():
     """ Query specific entries in the Inventory system """
     all_prod_info = []
@@ -132,7 +126,7 @@ def query_prod_info():
     results = [prod_info.serialize() for prod_info in all_prod_info]
     return jsonify(results), status.HTTP_200_OK
 
-@app.route(PATH_INVENTORY_PROD_ID, methods=[GET])
+@app.route('/inventory/<int:prod_id>', methods=[GET])
 def get_prod_info(prod_id):
     """ Return ProductInformation identified by prod_id """
     prod_info = ProductInformation.find(prod_id)
@@ -140,7 +134,7 @@ def get_prod_info(prod_id):
         raise NotFound(NOT_FOUND_MSG.format(prod_id))
     return jsonify(prod_info.serialize()), status.HTTP_200_OK
 
-@app.route(PATH_INVENTORY, methods=[POST])
+@app.route('/inventory', methods=[POST])
 def create_prod_info():
     """
     Creates a ProductInformation
@@ -161,7 +155,7 @@ def create_prod_info():
                              LOCATION: location_url
                          })
 
-@app.route(PATH_INVENTORY_PROD_ID, methods=[DELETE])
+@app.route('/inventory/<int:prod_id>', methods=[DELETE])
 def delete_prod_info(prod_id):
     """
     Deletes a ProductInformation
@@ -173,7 +167,7 @@ def delete_prod_info(prod_id):
         prod_info.delete()
     return make_response('Product information deleted.', status.HTTP_200_OK)
 
-@app.route(PATH_INVENTORY_PROD_ID, methods=[PUT])
+@app.route('/inventory/<int:prod_id>', methods=[PUT])
 def update_prod_info(prod_id):
     """
     Update prodcut information
@@ -193,7 +187,7 @@ def update_prod_info(prod_id):
 ######################################################################
 # Action placeholder
 ######################################################################
-@app.route(PATH_RESTOCK, methods=[PUT])
+@app.route('/inventory/<int:prod_id>/restock', methods=[PUT])
 def restock_action(prod_id):
     """
     Restock new quantity.
