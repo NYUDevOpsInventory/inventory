@@ -3,6 +3,7 @@ Inverntory Management System Service
 """
 
 from __future__ import print_function
+import json
 import logging
 import os
 import sys
@@ -46,7 +47,18 @@ LOCATION = 'Location'
 
 # Create Flask application
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URL'] = 'sqlite:////tmp/test.db'
+
+if 'VCAP_SERVICES' in os.environ:
+    app.logger.info("Using VCAP_SERVICES...")
+    vcap_services = os.environ['VCAP_SERVICES']
+    services = json.loads(vcap_services)
+    creds = services['cleardb'][0]['credentials']
+    app.config['SQLALCHEMY_DATABASE_URL'] = creds['uri']
+    app.logger.info("Connected to ClearDB on host %s port %s", creds['hostname'], creds['port'])
+else:
+    app.config['SQLALCHEMY_DATABASE_URL'] = 'sqlite:////tmp/test.db'
+    app.logger.info("VCAP_SERVICES not found, using local SQLite.")
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['LOGGING_LEVEL'] = logging.INFO
 
