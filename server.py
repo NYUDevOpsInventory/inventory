@@ -5,6 +5,7 @@ Inverntory Management System Service
 from __future__ import print_function
 import logging
 import os
+import pymysql
 import sys
 from flask import abort, Flask, jsonify, make_response, request, url_for
 from flask_api import status
@@ -48,7 +49,7 @@ LOCATION = 'Location'
 app = Flask(__name__)
 
 # Initialize ClearDB connection
-app.config['SQLALCHEMY_DATABASE_URL'] = 'mysql://root:123@localhost/inventory'
+app.config['SQLALCHEMY_DATABASE_URL'] = 'mysql+pymysql://root:123@localhost/inventory'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['LOGGING_LEVEL'] = logging.INFO
 
