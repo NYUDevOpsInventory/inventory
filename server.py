@@ -46,7 +46,9 @@ LOCATION = 'Location'
 
 # Create Flask application
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URL'] = 'sqlite:////tmp/test.db'
+
+# Initialize ClearDB connection
+app.config['SQLALCHEMY_DATABASE_URL'] = 'mysql://root:123@localhost/inventory'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['LOGGING_LEVEL'] = logging.INFO
 
