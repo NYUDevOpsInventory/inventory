@@ -5,18 +5,17 @@ Inverntory Management System Service
 from __future__ import print_function
 import logging
 import os
+import pymysql
 import sys
-from flask import abort, Flask, jsonify, make_response, request, url_for
+from flask import abort, jsonify, make_response, request, url_for
 from flask_api import status
 from models import DataValidationError, ProductInformation
 from werkzeug.exceptions import BadRequest, NotFound
+from app import app
 
 ######################################################################
 #  Fixed Global Variables
 ######################################################################
-# Pull options from environment
-DEBUG = (os.getenv('DEBUG', 'False') == 'True')
-PORT = os.getenv('PORT', '5000')
 # HTTP request methods
 DELETE = 'DELETE'
 GET = 'GET'
@@ -44,11 +43,6 @@ JSON = 'application/json'
 GET_PROD_INFO = 'get_prod_info'
 LOCATION = 'Location'
 
-# Create Flask application
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URL'] = 'sqlite:////tmp/test.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['LOGGING_LEVEL'] = logging.INFO
 
 ######################################################################
 # Error Handlers
@@ -211,8 +205,7 @@ def restock_action(prod_id):
 ######################################################################
 def init_db():
     """ Initialies the SQLAlchemy app """
-    global app
-    ProductInformation.init_db(app)
+    ProductInformation.init_db()
 
 def check_content_type(content_type):
     """ Checks that the media type is correct """
@@ -240,14 +233,3 @@ def initialize_logging(log_level=logging.INFO):
         app.logger.addHandler(handler)
         app.logger.setLevel(log_level)
         app.logger.info('Logging handler established')
-
-######################################################################
-#   M A I N
-######################################################################
-if __name__ == "__main__":
-    print("**********************************")
-    print("   INVENTORY MANAGEMENT SERVICE   ")
-    print("**********************************")
-    initialize_logging(logging.INFO)
-    init_db()  # make our sqlalchemy tables
-    app.run(host='0.0.0.0', port=int(PORT), debug=DEBUG)

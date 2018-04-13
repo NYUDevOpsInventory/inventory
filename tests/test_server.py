@@ -10,14 +10,15 @@ import logging
 import json
 import os
 import unittest
-import server
 from flask_api import status
-from models import ProductInformation, db
+from app import db, server
+from app.models import ProductInformation
 
 ######################################################################
 #  Fixed Global Variables
 ######################################################################
-DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///db/test.db')
+# DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///tmp/test.db')
+DATABASE_URI = os.getenv('DATABASE_URI', None)
 # Data table entry names
 PROD_ID = 'prod_id'
 PROD_NAME = 'prod_name'
@@ -55,7 +56,8 @@ class TestInventoryServer(unittest.TestCase):
         """ Run once before all tests """
         server.app.debug = False
         server.initialize_logging(logging.INFO)
-        server.app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        if DATABASE_URI:
+            server.app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 
     @classmethod
     def tearDownClass(cls):
