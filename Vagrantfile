@@ -88,7 +88,7 @@ Vagrant.configure(2) do |config|
   config.vm.provision "docker" do |d|
     d.pull_images "mariadb"
     d.run "mariadb",
-      args: "--restart=always -d --name mariadb -p 3306:3306 -v /var/lib/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123"
+      args: "--restart=always -d --name mariadb -p 3306:3306 -v /var/lib/mysql:/var/lib/mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=yes"
   end
 
   # Create data table after Docker is running

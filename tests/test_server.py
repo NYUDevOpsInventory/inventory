@@ -54,7 +54,7 @@ class TestInventoryServer(unittest.TestCase):
         """ Run once before all tests """
         server.app.debug = False
         server.initialize_logging(logging.INFO)
-        server.app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:123@localhost:3306/test_inventory"
+        server.app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost:3306/test_inventory"
 
     @classmethod
     def tearDownClass(cls):

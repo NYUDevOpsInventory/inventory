@@ -38,7 +38,7 @@ class TestProductInformation(unittest.TestCase):
     def setUpClass(cls):
         """ These run once per Test suite """
         app.debug = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:123@localhost:3306/test_inventory"
+        app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost:3306/test_inventory"
 
     @classmethod
     def tearDownClass(cls):
