@@ -88,13 +88,6 @@ Vagrant.configure(2) do |config|
   config.vm.provision "docker" do |d|
     d.pull_images "mysql"
     d.run "mysql",
-      args: "--restart=always -d --name mysql -p 3306:3306 -v /var/lib/mysql/data:/data -e MYSQL_ROOT_PASSWORD=123"
+      args: "--restart=always -d --name mysqldb -p 3306:3306 -v /var/lib/mysql/data:/data -e MYSQL_ROOT_PASSWORD=123 -e MYSQL_DATABASE=inventory"
   end
-
-  # Create data table after Docker is running
-  config.vm.provision "shell", inline: <<-SHELL
-    cd /vagrant
-    python create_table.py
-  SHELL
-
 end
