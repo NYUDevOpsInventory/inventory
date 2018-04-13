@@ -26,8 +26,6 @@ OPEN_BOXED_QTY = 'open_boxed_qty'
 RESTOCK_LEVEL = 'restock_level'
 RESTOCK_AMT = 'restock_amt'
 
-DATABASE_URI = os.getenv('DATABASE_URI', )
-
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
