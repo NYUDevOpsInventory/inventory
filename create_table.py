@@ -11,3 +11,4 @@ except Exception:
 	conn.cursor().execute('CREATE DATABASE IF NOT EXISTS test_inventory')
 	print "Creating database tables"
 	db.create_all()
+	
