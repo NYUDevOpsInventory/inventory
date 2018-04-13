@@ -76,4 +76,29 @@ Vagrant.configure(2) do |config|
     sudo -u ubuntu echo "colorscheme desert" > ~/.vimrc
   SHELL
 
+  ######################################################################
+  # Add MySQL docker container
+  ######################################################################
+  config.vm.provision "shell", inline: <<-SHELL
+    #Prepare MySQL data share
+    sudo mkdir -p /var/lib/mysql
+    sudo chown vagrant:vagrant /var/lib/mysql
+  SHELL
+
+  config.vm.provision "docker" do |d|
+    d.pull_images "mariadb"
+    d.run "mariadb",
+      args: "--restart=always -d --name mariadb -p 3306:3306 -v /var/lib/mysql:/var/lib/mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=yes"
+  end
+
+  # Create data table after Docker is running
+  config.vm.provision "shell", inline: <<-SHELL
+    # Wait for mariadb to come up
+    echo "Waiting 20 seconds for mariadb to start..."
+    sleep 20
+    cd /vagrant
+    python create_table.py
+    cd
+  SHELL
+
 end

@@ -8,8 +8,8 @@ Test cases can be run with:
 
 import os
 import unittest
-from models import db, DataValidationError, ProductInformation
-from server import app
+from app import app, db
+from app.models import DataValidationError, ProductInformation
 
 # Default ProductInformation property value
 DEFAULT_NEW_QTY = 0
@@ -26,8 +26,6 @@ OPEN_BOXED_QTY = 'open_boxed_qty'
 RESTOCK_LEVEL = 'restock_level'
 RESTOCK_AMT = 'restock_amt'
 
-DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///db/test.db')
-
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
@@ -38,14 +36,14 @@ class TestProductInformation(unittest.TestCase):
     def setUpClass(cls):
         """ These run once per Test suite """
         app.debug = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost:3306/test_inventory"
 
     @classmethod
     def tearDownClass(cls):
         pass
 
     def setUp(self):
-        ProductInformation.init_db(app)
+        # ProductInformation.init_db()
         db.drop_all()
         db.create_all()
 

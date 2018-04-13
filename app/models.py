@@ -18,11 +18,11 @@ restock_level   (int)       - when the product total quantity reaches below this
                               an automatic restock will be trigger.
 restock_amt     (int)       - the amount of new products restocked
                               when the total quantity goes under restock_level
-
 """
 
+import logging
 import math
-from flask_sqlalchemy import SQLAlchemy
+from app import db
 
 # Default ProductInformation property value
 DEFAULT_NEW_QTY = 0
@@ -47,12 +47,9 @@ class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
     pass
 
-db = SQLAlchemy()
-
 class ProductInformation(db.Model):
     """ A class representing an Inventory entry"""
-
-    app = None
+    logger = logging.getLogger(__name__)
 
     # Table Schema
     prod_id = db.Column(db.Integer, primary_key=True)
@@ -226,11 +223,9 @@ class ProductInformation(db.Model):
         return self
 
     @staticmethod
-    def init_db(app):
+    def init_db():
         """ Initialize database """
-        ProductInformation.app = app
-        db.init_app(app)
-        app.app_context().push()
+        ProductInformation.logger.info('Initializing database')
         db.create_all()
 
     @staticmethod
