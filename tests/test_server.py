@@ -183,12 +183,14 @@ class TestInventoryServer(unittest.TestCase):
         test_prod_id = 1
         response = self.app.delete(PATH_INVENTORY_PROD_ID.format(test_prod_id), content_type=JSON)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(response.data, '')
         self.assertEqual(entry_count - 1, self.get_entry_count())
 
         # Test deleting product information with non-existing prod_id
         test_prod_id = 3
         response = self.app.delete(PATH_INVENTORY_PROD_ID.format(test_prod_id), content_type=JSON)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(response.data, '')
         self.assertEqual(entry_count - 1, self.get_entry_count())
 
     def test_list_all_prod_info(self):
@@ -206,7 +208,7 @@ class TestInventoryServer(unittest.TestCase):
         response = self.app.delete(PATH_INVENTORY_PROD_ID.format(2), content_type=JSON)
         response = self.app.get(PATH_INVENTORY)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual('No Inventory is found.', response.data)
+        self.assertEqual(json.loads(response.data), [])
 
     def test_restock_action(self):
         """ Test manual restocking action. """
@@ -269,7 +271,7 @@ class TestInventoryServer(unittest.TestCase):
 
         response = self.app.get(PATH_INVENTORY_QUERY_BY_PROD_NAME.format("c"))
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assertEqual('No Inventory is found.', response.data)
+        self.assertEqual(json.loads(response.data), [])
 
     def test_query_by_quantity(self):
         """ Query by the total quantity """
@@ -288,7 +290,7 @@ class TestInventoryServer(unittest.TestCase):
 
         response = self.app.get(PATH_INVENTORY_QUERY_BY_QUANTITY.format(5))
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assertEqual('No Inventory is found.', response.data)
+        self.assertEqual(json.loads(response.data), [])
 
     def test_query_by_condition(self):
         """ Query by the product condition """

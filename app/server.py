@@ -115,8 +115,6 @@ def query_prod_info():
     else:
         abort(status.HTTP_400_BAD_REQUEST, INVALID_PARAMETER_MSG)
 
-    if not all_prod_info:
-        return make_response('No Inventory is found.', status.HTTP_200_OK)
     results = [prod_info.serialize() for prod_info in all_prod_info]
     return jsonify(results), status.HTTP_200_OK
 
@@ -159,7 +157,7 @@ def delete_prod_info(prod_id):
     prod_info = ProductInformation.find(prod_id)
     if prod_info:
         prod_info.delete()
-    return make_response('Product information deleted.', status.HTTP_200_OK)
+    return make_response('', status.HTTP_200_OK)
 
 @app.route('/inventory/<int:prod_id>', methods=[PUT])
 def update_prod_info(prod_id):
