@@ -26,7 +26,7 @@ OPEN_BOXED_QTY = 'open_boxed_qty'
 RESTOCK_LEVEL = 'restock_level'
 RESTOCK_AMT = 'restock_amt'
 
-DATABASE_URI = os.getenv('DATABASE_URI', None)
+DATABASE_URI = os.getenv('DATABASE_URI', )
 
 ######################################################################
 #  T E S T   C A S E S
@@ -38,8 +38,7 @@ class TestProductInformation(unittest.TestCase):
     def setUpClass(cls):
         """ These run once per Test suite """
         app.debug = False
-        if DATABASE_URI:
-            app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:123@localhost:3306/test_inventory"
 
     @classmethod
     def tearDownClass(cls):

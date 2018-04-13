@@ -18,7 +18,6 @@ restock_level   (int)       - when the product total quantity reaches below this
                               an automatic restock will be trigger.
 restock_amt     (int)       - the amount of new products restocked
                               when the total quantity goes under restock_level
-
 """
 
 import logging

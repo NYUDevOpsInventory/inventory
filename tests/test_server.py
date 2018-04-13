@@ -17,8 +17,6 @@ from app.models import ProductInformation
 ######################################################################
 #  Fixed Global Variables
 ######################################################################
-# DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///tmp/test.db')
-DATABASE_URI = os.getenv('DATABASE_URI', None)
 # Data table entry names
 PROD_ID = 'prod_id'
 PROD_NAME = 'prod_name'
@@ -56,8 +54,7 @@ class TestInventoryServer(unittest.TestCase):
         """ Run once before all tests """
         server.app.debug = False
         server.initialize_logging(logging.INFO)
-        if DATABASE_URI:
-            server.app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        server.app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:123@localhost:3306/test_inventory"
 
     @classmethod
     def tearDownClass(cls):
