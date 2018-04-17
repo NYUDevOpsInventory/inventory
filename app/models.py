@@ -20,9 +20,11 @@ restock_amt     (int)       - the amount of new products restocked
                               when the total quantity goes under restock_level
 """
 
+import os
+import json
 import logging
 import math
-from app import db
+from . import db
 
 # Default ProductInformation property value
 DEFAULT_NEW_QTY = 0
