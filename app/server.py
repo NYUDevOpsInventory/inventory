@@ -4,14 +4,12 @@ Inverntory Management System Service
 
 from __future__ import print_function
 import logging
-import os
-import pymysql
 import sys
+from app import app
+from app.models import DataValidationError, ProductInformation
 from flask import abort, jsonify, make_response, request, url_for
 from flask_api import status
-from models import DataValidationError, ProductInformation
 from werkzeug.exceptions import BadRequest, NotFound
-from app import app
 
 ######################################################################
 #  Fixed Global Variables
