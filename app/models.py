@@ -20,8 +20,6 @@ restock_amt     (int)       - the amount of new products restocked
                               when the total quantity goes under restock_level
 """
 
-import os
-import json
 import logging
 import math
 from . import db
