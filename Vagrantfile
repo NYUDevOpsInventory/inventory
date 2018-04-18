@@ -80,7 +80,7 @@ Vagrant.configure(2) do |config|
   # Add MySQL docker container
   ######################################################################
   config.vm.provision "shell", inline: <<-SHELL
-    #Prepare MySQL data share
+    echo "Preparing MySQL data share"
     sudo mkdir -p /var/lib/mysql
     sudo chown vagrant:vagrant /var/lib/mysql
   SHELL

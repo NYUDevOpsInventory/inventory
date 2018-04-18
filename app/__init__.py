@@ -1,13 +1,10 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-import logging
 
 app = Flask(__name__)
 
-# Initialize MariaDB connection
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost:3306/inventory'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['LOGGING_LEVEL'] = logging.INFO
+# Load the confguration
+app.config.from_object('config')
 
 db = SQLAlchemy(app)
 

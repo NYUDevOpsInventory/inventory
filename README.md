@@ -56,7 +56,7 @@ How to run the service
 3. Go the `/vagrant` directory and start the service.
   ```
   cd /vagrant
-  python server.py
+  python run.py
   ```
 
 How to test the code

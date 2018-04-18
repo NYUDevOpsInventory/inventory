@@ -22,7 +22,7 @@ restock_amt     (int)       - the amount of new products restocked
 
 import logging
 import math
-from app import db
+from . import db
 
 # Default ProductInformation property value
 DEFAULT_NEW_QTY = 0
