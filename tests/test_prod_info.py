@@ -36,7 +36,9 @@ class TestProductInformation(unittest.TestCase):
     def setUpClass(cls):
         """ These run once per Test suite """
         app.debug = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost:3306/test_inventory"
+        if 'VCAP_SERVICES' not in os.environ:
+            # Workaround for using the local test database
+            app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost:3306/test_inventory"
 
     @classmethod
     def tearDownClass(cls):
