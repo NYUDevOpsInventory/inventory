@@ -76,6 +76,7 @@ def index():
     return jsonify(
         name='Inventory Management REST API Service',
         version='1.0',
+        docs=request.base_url + 'apidocs/index.html',
         usage={
             'help': 'GET /',
             'list all': 'GET /inventory',

@@ -5,6 +5,7 @@ SQLAlchemy==1.1.5
 PyMySQL==0.7.11
 pylint==1.7.2
 flake8
+flasgger
 
 # Testing
 mock==2.0.0
