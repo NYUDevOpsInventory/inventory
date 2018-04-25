@@ -72,22 +72,7 @@ def not_found(error):
 ######################################################################
 @app.route('/')
 def index():
-    """ Return help information about the API """
-    return jsonify(
-        name='Inventory Management REST API Service',
-        version='1.0',
-        docs=request.base_url + 'apidocs/index.html',
-        usage={
-            'help': 'GET /',
-            'list all': 'GET /inventory',
-            'read': 'GET /inventory/{prod_id}',
-            'create': 'POST /inventory',
-            'update': 'PUT /inventory/{prod_id}',
-            'delete': 'DELETE /inventory/{prod_id}',
-            'query': 'GET /inventory?{prod_name|quantity|condition=val}',
-            'restock': 'PUT /inventory/{prod_id}/restock',
-        },
-    ), status.HTTP_200_OK
+    return app.send_static_file('index.html')
 
 @app.route('/inventory', methods=[GET])
 def query_prod_info():

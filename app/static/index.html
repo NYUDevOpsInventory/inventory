@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Inventory Management System</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="static/css/flatly_bootstrap.min.css">
+  <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="static/js/rest_api.js"></script>
+</head>
+  <body>
+    <div class="container">
+      <div class="page-header">
+        <h1>Inventory Management System</h1>
+      </div>
+
+      <!-- Flash Message -->
+      <div class="table-responsive">
+        <table class="table">
+          <tr><td>Status:</td><td><span id="flash_message"></span></td></tr>
+        </table>
+      </div>
+
+      <div class="col-md-11" id="form_data">
+        Create, Retrieve, Update, and Delete an Inventory entry:
+        <div class="well">
+          <div class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="prod_id">Product ID:</label>
+              <div class="col-sm-5">
+                <input type="text" class="form-control" id="prod_id" placeholder="Enter product's ID">
+              </div>
+              <div class="col-sm-4">
+                <button type="submit" class="btn btn-primary" id="retrieve-btn">Retrieve</button>
+                <button type="submit" class="btn btn-danger" id="delete-btn">Delete</button>
+              </div>
+            </div>
+          </div> <!-- form div -->
+
+          <div class="form-horizontal">
+
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="prod_name">Name:</label>
+              <div class="col-sm-9">
+                <input type="text" class="form-control" id="prod_name" placeholder="Enter product's name">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="prod_qty">Product Quantity:</label>
+              <div class="col-sm-3">
+                <input type="text" class="form-control" id="new_qty" placeholder="New products quantity">
+              </div>
+              <div class="col-sm-3">
+                <input type="text" class="form-control" id="used_qty" placeholder="Used products quantity">
+              </div>
+              <div class="col-sm-3">
+                <input type="text" class="form-control" id="open_boxed_qty" placeholder="Open-boxed quantity">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="restock_level">Restock Level:</label>
+              <div class="col-sm-9">
+                <input type="text" class="form-control" id="restock_level" placeholder="Enter restock level">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="restock_amt">Restock Amount:</label>
+              <div class="col-sm-9">
+                <input type="text" class="form-control" id="restock_amt" placeholder="Enter restock amount">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="search">Search By:</label>
+              <div class="col-sm-2">
+                <select class="form-control" id="searchKey">
+                  <option value="prod_name" selected>Name</option>
+                  <option value="quantity">Quantity</option>
+                  <option value="condition">Condition</option>
+                </select>
+              </div>
+              <div class="col-sm-5">
+                <input type="text" class="form-control" id="searchValue" placeholder="Enter keyword here">
+              </div>
+              <div class="col-sm-2">
+                <button type="submit" class="btn btn-primary" id="search-btn">Go!</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary" id="clear-btn">Clear</button>
+                <button type="submit" class="btn btn-success" id="create-btn">Create</button>
+                <button type="submit" class="btn btn-warning" id="update-btn">Update</button>
+              </div>
+            </div>
+          </div> <!-- form div -->
+        </div>
+
+      <!-- Search Results -->
+        <div class="table-responsive col-md-12" id="search_results">
+          <table class="table-striped">
+            <thead>
+            <tr>
+                <th class="col-md-1">ID</th>
+                <th class="col-md-2">Product Name</th>
+                <th class="col-md-2">New Quantity</th>
+                <th class="col-md-2">Used Quantity</th>
+                <th class="col-md-2">Open-boxed Quantity</th>
+                <th class="col-md-1">Restock Level</th>
+                <th class="col-md-1">Restock Amount</th>
+            </tr>
+            </thead>
+          </table>
+        </div>
+
+        <footer>
+          <br><br>
+          <a href="apidocs/index.html">View Swagger Documentation</a>
+          <p>&copy; NYU DevOps Inventory Company 2017</p>
+        </footer>
+      </div><!--/span-->
+    </div><!-- container -->
+  </body>
+</html>
