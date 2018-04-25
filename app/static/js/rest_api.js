@@ -172,7 +172,7 @@ $(function () {
 
         ajax.done(function(res){
             clear_form_data()
-            flash_message("Product with ID [" + res.prod_id + "] has been Deleted!")
+            flash_message("Product has been Deleted!")
         });
 
         ajax.fail(function(res){
@@ -185,7 +185,6 @@ $(function () {
     // ****************************************
 
     $("#clear-btn").click(function () {
-        $("#prod_id").val("");
         clear_form_data()
     });
 
