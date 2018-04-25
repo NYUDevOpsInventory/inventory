@@ -14,4 +14,4 @@ def before_all(context):
     context.driver.implicitly_wait(10) # seconds
     context.driver.set_window_size(1120, 550)
     context.base_url = BASE_URL
-    
+
