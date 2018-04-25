@@ -1,6 +1,6 @@
 from __future__ import print_function
-from app import app, server
 import os
+from app import app, server
 
 # Pull options from environment
 DEBUG = (os.getenv('DEBUG', 'False') == 'True')

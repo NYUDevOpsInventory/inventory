@@ -54,7 +54,9 @@ class TestInventoryServer(unittest.TestCase):
         """ Run once before all tests """
         server.app.debug = False
         server.initialize_logging(logging.INFO)
-        server.app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost:3306/test_inventory"
+        if 'VCAP_SERVICES' not in os.environ:
+            # Workaround for using the local test database
+            server.app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost:3306/test_inventory"
 
     @classmethod
     def tearDownClass(cls):
