@@ -143,7 +143,6 @@ $(function () {
         })
 
         ajax.done(function(res){
-            //alert(res.toSource())
             update_form_data(res)
             flash_message("Success")
         });
@@ -205,7 +204,6 @@ $(function () {
         })
 
         ajax.done(function(res){
-            //alert(res.toSource())
             $("#search_results").empty();
             var table = '<table class="table-striped">'
             var header = '<thead> <tr>'
