@@ -115,6 +115,58 @@ def create_prod_info():
     """
     Creates a ProductInformation
     This endpoint will create a ProductInformation based the data in the body that is posted
+    ---
+    tags:
+        -   Inventory
+    consumes:
+        -   application/json
+    produces:
+        -   application/json
+    definitions:
+        Product:
+            type: object
+            properties:
+                prod_id:
+                    type: integer
+                    description: Unique ID of the product.
+                prod_name:
+                    type: string
+                    description: Name for the product.
+                new_qty:
+                    type: integer
+                    description: Quantity of condition "new".
+                used_qty:
+                    type: integer
+                    description: Quantity of condition "used".
+                open_boxed_qty:
+                    type: integer
+                    description: Quantity of condition "open boxed".
+                restock_level:
+                    type: integer
+                    minimum: -1
+                    description: Bottom line of a product's quantity with condition "new".
+                restock_amt:
+                    type: integer
+                    description: Quantity to be added to a product's quantity with condition "new".
+    parameters:
+        -   in: body
+            name: body
+            required: true
+            description: 
+            schema:
+                id: data
+                required:
+                    - prod_id
+                    - prod_name
+                $ref: '#/definitions/Product'
+                
+    responses:
+        201:
+            description: Product information created
+            schema:
+                $red: '#/definitions/Product'
+        400:
+            description: Bad Request (invalid posted data)        
     """
     check_content_type(JSON)
     prod_info = ProductInformation()
