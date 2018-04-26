@@ -164,7 +164,7 @@ def create_prod_info():
         201:
             description: Product information created
             schema:
-                $red: '#/definitions/Product'
+                $ref: '#/definitions/Product'
         400:
             description: Bad Request (invalid posted data)        
     """
