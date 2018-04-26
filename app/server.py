@@ -104,7 +104,27 @@ def query_prod_info():
 
 @app.route('/inventory/<int:prod_id>', methods=[GET])
 def get_prod_info(prod_id):
-    """ Return ProductInformation identified by prod_id """
+    """
+    Return ProductInformation identified by prod_id.
+    ---
+    tags:
+      -     Inventory
+    produces:
+      -     application/json
+    parameters:
+      -     name: prod_id
+            in: path
+            description: ID of Inventory entry to retrieve
+            type: integer
+            required: true
+    responses:
+        200:
+            description: Inventory entry returned
+            schema:
+                $ref: '#/definitions/Product'
+        404:
+            description: Inventory entry not found
+    """
     prod_info = ProductInformation.find(prod_id)
     if not prod_info:
         raise NotFound(NOT_FOUND_MSG.format(prod_id))
@@ -190,7 +210,7 @@ def delete_prod_info(prod_id):
     Should always return 200 OK.
     ---
     tags:
-        - Inventory
+        -   Inventory
     parameters:
         -   in: path
             name: prod_id
