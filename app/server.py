@@ -229,6 +229,7 @@ def update_prod_info(prod_id):
             name: body
             schema:
                 id: data
+                $ref: '#/definitions/Product'
     responses:
         200:
             description: Inventory information Updated
