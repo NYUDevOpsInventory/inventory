@@ -152,7 +152,6 @@ def create_prod_info():
         -   in: body
             name: body
             required: true
-            description: 
             schema:
                 id: data
                 required:
@@ -188,7 +187,19 @@ def delete_prod_info(prod_id):
     """
     Deletes a ProductInformation
     This endpoint will delete a ProductInformation based on the prod_id specified in the path.
-    Should always return 200OK.
+    Should always return 200 OK.
+    ---
+    tags:
+        - Inventory
+    parameters:
+        -   in: path
+            name: prod_id
+            type: integer
+            required: true
+            description: prod_id of the product information to be deleted.                
+    responses:
+        200:
+            description: Product information deleted.
     """
     prod_info = ProductInformation.find(prod_id)
     if prod_info:
