@@ -41,6 +41,38 @@ $(function () {
         }
     }
 
+    // Update the search results
+    function update_search_results(res) {
+        $("#search_results").empty();
+        var table = '<table class="table-striped">'
+        var header = '<thead> <tr>'
+        header += '<th class="col-md-1">ID</th>'
+        header += '<th class="col-md-2">Product Name</th>'
+        header += '<th class="col-md-2">New Qty</th>'
+        header += '<th class="col-md-2">Used Qty</th>'
+        header += '<th class="col-md-2">Open-boxed Qty</th>'
+        header += '<th class="col-md-1">Restock Level</th>'
+        header += '<th class="col-md-1">Restock Amount</th>'
+        header += '</tr> </thead>'
+        table += header
+        table += "<tbody>"
+        for(var i = 0; i < res.length; i++) {
+            entry = res[i];
+            var row = "<tr><td>" + entry.prod_id + "</td><td>"
+                                 + entry.prod_name + "</td><td>"
+                                 + entry.new_qty + "</td><td>"
+                                 + entry.used_qty + "</td><td>"
+                                 + entry.open_boxed_qty + "</td><td>"
+                                 + entry.restock_level + "</td><td>"
+                                 + entry.restock_amt + "</td></tr>";
+            table += row
+        }
+
+        table += "</tbody></table>";
+        $("#search_results").append(table);
+        flash_message("Success")
+    }
+
     // ****************************************
     // Create a Product
     // ****************************************
@@ -204,40 +236,34 @@ $(function () {
         })
 
         ajax.done(function(res){
-            $("#search_results").empty();
-            var table = '<table class="table-striped">'
-            var header = '<thead> <tr>'
-            header += '<th class="col-md-1">ID</th>'
-            header += '<th class="col-md-2">Product Name</th>'
-            header += '<th class="col-md-2">New Qty</th>'
-            header += '<th class="col-md-2">Used Qty</th>'
-            header += '<th class="col-md-2">Open-boxed Qty</th>'
-            header += '<th class="col-md-1">Restock Level</th>'
-            header += '<th class="col-md-1">Restock Amount</th>'
-            header += '</tr> </thead>'
-            table += header
-            table += "<tbody>"
-            for(var i = 0; i < res.length; i++) {
-                entry = res[i];
-                var row = "<tr><td>" + entry.prod_id + "</td><td>"
-                                     + entry.prod_name + "</td><td>"
-                                     + entry.new_qty + "</td><td>"
-                                     + entry.used_qty + "</td><td>"
-                                     + entry.open_boxed_qty + "</td><td>"
-                                     + entry.restock_level + "</td><td>"
-                                     + entry.restock_amt + "</td></tr>";
-                table += row
-            }
-
-            table += "</tbody></table>";
-            $("#search_results").append(table);
-            flash_message("Success")
+            update_search_results(res)
         });
 
         ajax.fail(function(res){
             flash_message(res.responseJSON.message)
         });
 
+    });
+
+    // ****************************************
+    // List all product information
+    // ****************************************
+
+    $("#list-btn").click(function () {
+        var ajax = $.ajax({
+            type: "GET",
+            url: "/inventory",
+            contentType:"application/json",
+            data: ''
+        })
+
+        ajax.done(function(res){
+            update_search_results(res)
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
     });
 
 })
