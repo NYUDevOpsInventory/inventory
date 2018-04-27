@@ -130,11 +130,11 @@ class ProductInformation(db.Model):
             raise DataValidationError(BAD_DATA_MSG)
 
         # populate ProductInformation with given data or None
-        self.new_qty = int(data_new_qty)
-        self.used_qty = int(data_used_qty)
-        self.open_boxed_qty = int(data_open_boxed_qty)
-        self.restock_level = int(data_restock_level)
-        self.restock_amt = int(data_restock_amt)
+        self.new_qty = int(data_new_qty) if data_new_qty else None
+        self.used_qty = int(data_used_qty) if data_used_qty else None
+        self.open_boxed_qty = int(data_open_boxed_qty) if data_open_boxed_qty else None
+        self.restock_level = int(data_restock_level) if data_restock_level else None
+        self.restock_amt = int(data_restock_amt) if data_restock_amt else None
 
         if initialize_property:
             if self.new_qty is None:
