@@ -266,4 +266,33 @@ $(function () {
         });
     });
 
+    // ****************************************
+    // Restock a Product
+    // ****************************************
+
+    $("#restock-btn").click(function () {
+
+        var prod_id = $("#prod_id").val();
+        var restock_amt = parseInt($("#restock_amt").val());
+
+        var data = {
+            "restock_amt": restock_amt,
+        };
+
+        var ajax = $.ajax({
+            type: "PUT",
+            url: "/inventory/" + prod_id + "/restock",
+            contentType:"application/json",
+            data: JSON.stringify(data)
+        })
+
+        ajax.done(function(res){
+            flash_message("Product " + prod_id + " restocks successfully.")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
 })
