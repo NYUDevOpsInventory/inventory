@@ -23,6 +23,11 @@ def step_impl(context):
         context.resp = requests.delete(inventory_url + '/' + row['prod_id'])
         expect(context.resp.status_code).to_equal(200)
 
+    # delete product with prod_id 4 if exist
+    # so as to prepare for testing Create
+    context.resp = requests.delete(inventory_url + '/4')
+    expect(context.resp.status_code).to_equal(200)
+
     # then create all mentioned products
     headers = {'Content-Type': 'application/json'}
     for row in context.table:
@@ -67,8 +72,6 @@ def step_impl(context, text_string, element_id):
 
 @then(u'I should see the message "{message}"')
 def step_impl(context, message):
-    #element = context.driver.find_element_by_id('flash_message')
-    #expect(element.text).to_contain(message)
     found = WebDriverWait(context.driver, WAIT_SECONDS).until(
         expected_conditions.text_to_be_present_in_element(
             (By.ID, 'flash_message'),

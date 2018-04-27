@@ -12,8 +12,8 @@ Background:
 
 Scenario: Retrive an ProductInformation
     When I visit the "Home Page"
-    AND I set the "prod_id" to "2"
-    AND I press the "retrieve" Button
+    And I set the "prod_id" to "2"
+    And I press the "retrieve" Button
     Then I should see "2" in the "new_qty" field
     AND I should see "2" in the "used_qty" field
     AND I should see "2" in the "open_boxed_qty" field
@@ -25,3 +25,10 @@ Scenario: Delete a product from Inventory
     And I set the "prod_id" to "3"
     And I press the "delete" Button
     Then I should see the message "Product has been Deleted!"
+
+Scenario: Create a new ProductInformation
+    When I visit the "Home Page"
+    And I set the "prod_id" to "4"
+    And I set the "prod_name" to "StormTrooper"
+    And I press the "create" Button
+    Then I should see the message "Success"
