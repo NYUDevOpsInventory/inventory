@@ -229,9 +229,34 @@ def delete_prod_info(prod_id):
 @app.route('/inventory/<int:prod_id>', methods=[PUT])
 def update_prod_info(prod_id):
     """
-    Update prodcut information
+    Update ProdcutInformation
 
-    This endpoint will update a ProductInformation based on data that id posted in the body
+    This endpoint will update product inventory information (by id) based on data posted in the body
+    ---
+    tags:
+        -   Inventory
+    consumes:
+        -   application/json
+    produces:
+        -   application/json
+    parameters:
+        -   name: prod_id
+            in: path
+            description: ID of product information to be updated
+            type: integer
+            required: true
+        -   in: body
+            name: body
+            schema:
+                id: data
+                $ref: '#/definitions/Product'
+    responses:
+        200:
+            description: Inventory information Updated
+            schema:
+                $ref: '#/definitions/Product'
+        400:
+            description: Bad Request (the posted data was not valid)
     """
     check_content_type(JSON)
     prod_info = ProductInformation.find(prod_id)
