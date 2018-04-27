@@ -130,11 +130,11 @@ class ProductInformation(db.Model):
             raise DataValidationError(BAD_DATA_MSG)
 
         # populate ProductInformation with given data or None
-        self.new_qty = data_new_qty
-        self.used_qty = data_used_qty
-        self.open_boxed_qty = data_open_boxed_qty
-        self.restock_level = data_restock_level
-        self.restock_amt = data_restock_amt
+        self.new_qty = int(data_new_qty)
+        self.used_qty = int(data_used_qty)
+        self.open_boxed_qty = int(data_open_boxed_qty)
+        self.restock_level = int(data_restock_level)
+        self.restock_amt = int(data_restock_amt)
 
         if initialize_property:
             if self.new_qty is None:
@@ -210,15 +210,15 @@ class ProductInformation(db.Model):
         if data_prod_name is not None:
             self.prod_name = data_prod_name
         if data_new_qty is not None:
-            self.new_qty = data_new_qty
+            self.new_qty = int(data_new_qty)
         if data_used_qty is not None:
-            self.used_qty = data_used_qty
+            self.used_qty = int(data_used_qty)
         if data_open_boxed_qty is not None:
-            self.open_boxed_qty = data_open_boxed_qty
+            self.open_boxed_qty = int(data_open_boxed_qty)
         if data_restock_level is not None:
-            self.restock_level = data_restock_level
+            self.restock_level = int(data_restock_level)
         if data_restock_amt is not None:
-            self.restock_amt = data_restock_amt
+            self.restock_amt = int(data_restock_amt)
 
         return self
 
