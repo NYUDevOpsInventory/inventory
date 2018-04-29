@@ -20,6 +20,12 @@ Scenario: Retrive an ProductInformation
     And I should see "5" in the "restock_level" field
     And I should see "9" in the "restock_amt" field
 
+Scenario: Delete a product from Inventory
+    When I visit the "Home Page"
+    And I set the "prod_id" to "3"
+    And I press the "delete" Button
+    Then I should see the message "Product has been Deleted!"
+
 Scenario: Create a new ProductInformation
     When I visit the "Home Page"
     And I set the "prod_id" to "4"
