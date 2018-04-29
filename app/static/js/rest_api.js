@@ -78,13 +78,13 @@ $(function () {
     // ****************************************
 
     $("#create-btn").click(function () {
-        var prod_id = $("#prod_id").val();
+        var prod_id = parseInt($("#prod_id").val());
         var prod_name = $("#prod_name").val();
-        var new_qty = $("#new_qty").val();
-        var used_qty = $("#used_qty").val();
-        var open_boxed_qty = $("#open_boxed_qty").val();
-        var restock_level = $("#restock_level").val();
-        var restock_amt = $("#restock_amt").val();
+        var new_qty = parseInt($("#new_qty").val());
+        var used_qty = parseInt($("#used_qty").val());
+        var open_boxed_qty = parseInt($("#open_boxed_qty").val());
+        var restock_level = parseInt($("#restock_level").val());
+        var restock_amt = parseInt($("#restock_amt").val());
 
         var data = {
             "prod_id": prod_id,
@@ -122,13 +122,13 @@ $(function () {
 
     $("#update-btn").click(function () {
 
-        var prod_id = $("#prod_id").val();
+        var prod_id = parseInt($("#prod_id").val());
         var prod_name = $("#prod_name").val();
-        var new_qty = $("#new_qty").val();
-        var used_qty = $("#used_qty").val();
-        var open_boxed_qty = $("#open_boxed_qty").val();
-        var restock_level = $("#restock_level").val();
-        var restock_amt = $("#restock_amt").val();
+        var new_qty = parseInt($("#new_qty").val());
+        var used_qty = parseInt($("#used_qty").val());
+        var open_boxed_qty = parseInt($("#open_boxed_qty").val());
+        var restock_level = parseInt($("#restock_level").val());
+        var restock_amt = parseInt($("#restock_amt").val());
 
         var data = {
             "prod_name": prod_name,
@@ -266,4 +266,33 @@ $(function () {
         });
     });
 
+    // ****************************************
+    // Restock a Product
+    // ****************************************
+
+    $("#restock-btn").click(function () {
+
+        var prod_id = $("#prod_id").val();
+        var restock_amt = parseInt($("#restock_amt").val());
+
+        var data = {
+            "restock_amt": restock_amt,
+        };
+
+        var ajax = $.ajax({
+            type: "PUT",
+            url: "/inventory/" + prod_id + "/restock",
+            contentType:"application/json",
+            data: JSON.stringify(data)
+        })
+
+        ajax.done(function(res){
+            flash_message("Product " + prod_id + " restocks successfully.")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
 })
