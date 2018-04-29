@@ -15,10 +15,10 @@ Scenario: Retrive an ProductInformation
     And I set the "prod_id" to "2"
     And I press the "retrieve" Button
     Then I should see "2" in the "new_qty" field
-    AND I should see "2" in the "used_qty" field
-    AND I should see "2" in the "open_boxed_qty" field
-    AND I should see "5" in the "restock_level" field
-    AND I should see "9" in the "restock_amt" field
+    And I should see "2" in the "used_qty" field
+    And I should see "2" in the "open_boxed_qty" field
+    And I should see "5" in the "restock_level" field
+    And I should see "9" in the "restock_amt" field
 
 Scenario: Delete a product from Inventory
     When I visit the "Home Page"
