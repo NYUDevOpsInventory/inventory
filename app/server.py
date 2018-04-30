@@ -80,7 +80,7 @@ def query_prod_info():
     Query specific entries in the Inventory system by prod_name, quantity, or condition.
     ---
     tags:
-	    -   Inventory
+        -   Inventory
     produces:
         -   application/json
     parameters:
