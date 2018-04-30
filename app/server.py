@@ -80,29 +80,29 @@ def query_prod_info():
     Query specific entries in the Inventory system by prod_name, quantity, or condition.
     ---
     tags:
-	- Inventory
+	    -   Inventory
     produces:
-        - application/json
+        -   application/json
     parameters:
-        - name: prod_name
-          in: query
-          description: Product name.
-          required: false
-          type: string
-        - name: quantity
-          in: query
-          description: Quantity of condition 'new'.
-          required: false
-          type: integer
-        - name: condition
-          in: query
-          description: Condition of the product (e.g., new, used, open_boxed).
-          required: false
-          type: string
-          enum:
-              - new
-              - used
-              - open_boxed
+        -   name: prod_name
+            in: query
+            description: Product name.
+            required: false
+            type: string
+        -   name: quantity
+            in: query
+            description: Quantity of condition 'new'.
+            required: false
+            type: integer
+        -   name: condition
+            in: query
+            description: Condition of the product (e.g., new, used, open_boxed).
+            required: false
+            type: string
+            enum:
+                -   new
+                -   used
+                -   open_boxed
     responses:
         200:
             description: An array of product information.
