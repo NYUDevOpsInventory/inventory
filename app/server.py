@@ -77,41 +77,41 @@ def index():
 @app.route('/inventory', methods=[GET])
 def query_prod_info():
     """
-    Retrieve a list of inventory items
-    This endpoint will return all details of the all the products in the inventory unless a query parameter is specificed
+    Retrieve a list of all the products in the inventory & query specific entries in the Inventory system
+    This endpoint will return all the details of the products in the inventory unless a query parameter is specificed
     ---
     tags:
-      - inventory
+      -     Inventory
     description: The inventory endpoint allows you to query the inventory
     parameters:
-      - name: prod_name
-        in: query
-        description: the name of the product you are looking for
-        required: false
-        type: string
-      - name: quantity
-        in: query
-        description: if you want to check how many products have a specfic quantity
-        required: false
-        type: integer
-      - name: condition
-        in: query
-        description: if you want to find all the products of a certain condition
-        required: false
-        type: string
+      -     name: prod_name
+            in: query
+            description: the name of the product you are looking for
+            required: false
+            type: string
+      -     name: quantity
+            in: query
+            description: if you want to check how many products have a specfic quantity
+            required: false
+            type: integer
+      -     name: condition
+            in: query
+            description: if you want to find all the products of a certain condition
+            required: false
+            type: string
 
     responses:
       400:
           description: Bad Request (invalid posted data)
       200:
-        description: An array of all the products
-        schema:
-          type: array
-          items:
-            schema:
-              $ref: '#/definitions/Product'
+          description: An array of all the products
+          schema:
+            type: array
+            items:
+              schema:
+                $ref: '#/definitions/Product'
     """
-    """ Query specific entries in the Inventory system """
+
     all_prod_info = []
     if request.args.get('prod_name'):
         prod_name = request.args.get('prod_name')
