@@ -280,18 +280,28 @@ def restock_action(prod_id):
     ---
     tags:
         - Inventory
+    consumes:
+        - application/json
+    definitions:
+        Restock_Amount:
+            type: object
+            properties:
+                restock_amt:
+                    type: integer
+                    minimum: 0
+                    description: Amount to be added to the product's new_amt field. 
     parameters:
         - name: prod_id
           in: path
           description: ID of product.
           type: integer
           required: true
-        - name: restock_amt
-          in: path
-          description: Amount to be added to the product's new_qty filed.
-          type: integer
-          minimum: 0
+        - in: body
+          name: body
           required: true
+          schema:
+            id: data
+            $ref: '#/definitions/Restock_Amount'
     responses:
         200:
             description: Product restocked successfully.
