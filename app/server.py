@@ -76,7 +76,44 @@ def index():
 
 @app.route('/inventory', methods=[GET])
 def query_prod_info():
-    """ Query specific entries in the Inventory system """
+    """
+    Query specific entries in the Inventory system by prod_name, quantity, or condition.
+    ---
+    tags:
+        -   Inventory
+    produces:
+        -   application/json
+    parameters:
+        -   name: prod_name
+            in: query
+            description: Product name.
+            required: false
+            type: string
+        -   name: quantity
+            in: query
+            description: Quantity of condition 'new'.
+            required: false
+            type: integer
+        -   name: condition
+            in: query
+            description: Condition of the product (e.g., new, used, open_boxed).
+            required: false
+            type: string
+            enum:
+                -   new
+                -   used
+                -   open_boxed
+    responses:
+        200:
+            description: An array of product information.
+            schema:
+                type: array
+                items:
+                    schema:
+                        $ref: '#/definitions/Product'
+        400:
+            description: Bad request (invalid posted data)                
+    """
     all_prod_info = []
     if request.args.get('prod_name'):
         prod_name = request.args.get('prod_name')
