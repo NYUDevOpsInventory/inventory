@@ -32,3 +32,10 @@ Scenario: Create a new ProductInformation
     And I set the "prod_name" to "StormTrooper"
     And I press the "create" Button
     Then I should see the message "Success"
+
+Scenario: Query a product by Name
+    When I visit the "Home Page"
+    And I select "prod_name" for "searchKey"
+    And I set the "searchValue" to "iPhone"
+    And I press the "search" Button
+    Then I should see the message "Success"

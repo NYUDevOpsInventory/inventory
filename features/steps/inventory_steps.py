@@ -8,7 +8,7 @@ import json
 import requests
 from compare import expect
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions
 
 WAIT_SECONDS = 30
@@ -54,6 +54,11 @@ def step_impl(context, element_id, text_string):
     element = context.driver.find_element_by_id(element_id)
     element.clear()
     element.send_keys(text_string)
+
+@when(u'I select "{option_value}" for "{element_id}"')
+def step_impl(context, option_value, element_id):
+    select = Select(context.driver.find_element_by_id(element_id))
+    select.select_by_value(option_value)
 
 @when(u'I press the "{button}" Button')
 def step_impl(context, button):
