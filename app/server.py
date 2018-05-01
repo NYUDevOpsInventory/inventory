@@ -77,7 +77,11 @@ def index():
 @app.route('/inventory', methods=[GET])
 def query_prod_info():
     """ Query specific entries in the Inventory system """
-    app.logger.info("GET received, List all.")
+    if request.args:
+        app.logger.info("GET received, List all that satisfies {}.".format(request.args.to_dict()))
+    else:
+        app.logger.info("GET received, List all.")
+
     all_prod_info = []
     if request.args.get('prod_name'):
         prod_name = request.args.get('prod_name')
