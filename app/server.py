@@ -78,8 +78,6 @@ def index():
     ---
     tags:
       -     Inventory
-    produces:
-      -     application/json
     responses:
         200:
             description: the homepage is successfully returned.
