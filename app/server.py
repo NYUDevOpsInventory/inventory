@@ -72,6 +72,16 @@ def not_found(error):
 ######################################################################
 @app.route('/')
 def index():
+    """
+    Returns the homepage of the Inventory Management System
+    This endpoint returns the homepage of the Inventory Management System in html format.
+    ---
+    tags:
+      -     Inventory
+    responses:
+        200:
+            description: the homepage is successfully returned.
+    """
     return app.send_static_file('index.html')
 
 @app.route('/inventory', methods=[GET])
