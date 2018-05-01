@@ -6,7 +6,7 @@ from __future__ import print_function
 import logging
 import sys
 from app import app
-# Error handlers reuire app to be initialized so we must import
+# Error handlers require app to be initialized so we must import
 # then only after we have initialized the Flask app instance
 from app import error_handlers
 from app.models import ProductInformation
