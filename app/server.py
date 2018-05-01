@@ -6,7 +6,10 @@ from __future__ import print_function
 import logging
 import sys
 from app import app
-from app.models import DataValidationError, ProductInformation
+# Error handlers reuire app to be initialized so we must import
+# then only after we have initialized the Flask app instance
+from app import error_handlers
+from app.models import ProductInformation
 from flask import abort, jsonify, make_response, request, url_for
 from flask_api import status
 from werkzeug.exceptions import BadRequest, NotFound
@@ -20,11 +23,7 @@ GET = 'GET'
 POST = 'POST'
 PUT = 'PUT'
 # Errors
-BAD_REQUEST_ERROR = 'Bad Request.'
-INTERNAL_SERVER_ERROR = 'Internal Server Error'
 INVALID_CONTENT_TYPE_ERROR = 'Invalid Content-Type: %s'
-METHOD_NOT_ALLOWED_ERROR = 'Method Not Allowed'
-NOT_FOUND_ERROR = 'Not Found.'
 # Messages
 CANNOT_CREATE_MSG = "Product with id '{}' already existed. Cannot create new product " \
         "information with the same prod_id."
@@ -40,32 +39,6 @@ JSON = 'application/json'
 # Locations
 GET_PROD_INFO = 'get_prod_info'
 LOCATION = 'Location'
-
-
-######################################################################
-# Error Handlers
-######################################################################
-@app.errorhandler(DataValidationError)
-def request_validation_error(error):
-    """ Handles all data validation issues from the model """
-    app.logger.info(error.message)
-    return jsonify(status=status.HTTP_400_BAD_REQUEST, error=BAD_REQUEST_ERROR,
-                   message=error.message), status.HTTP_400_BAD_REQUEST
-
-@app.errorhandler(status.HTTP_400_BAD_REQUEST)
-def bad_request(error):
-    """ Handles requests that have bad or malformed data """
-    app.logger.info(str(error))
-    return jsonify(status=status.HTTP_400_BAD_REQUEST, error=BAD_REQUEST_ERROR,
-                   message=error.description), status.HTTP_400_BAD_REQUEST
-
-@app.errorhandler(status.HTTP_404_NOT_FOUND)
-def not_found(error):
-    """ Handles product information that cannot be found """
-    message = error.message or str(error)
-    app.logger.info(message)
-    return jsonify(status=status.HTTP_404_NOT_FOUND, error=NOT_FOUND_ERROR,
-                   message=error.message), status.HTTP_404_NOT_FOUND
 
 ######################################################################
 # API placeholder
@@ -336,7 +309,7 @@ def restock_action(prod_id):
                 restock_amt:
                     type: integer
                     minimum: 0
-                    description: Amount to be added to the product's new_amt field. 
+                    description: Amount to be added to the product's new_amt field.
     parameters:
         -   name: prod_id
             in: path
