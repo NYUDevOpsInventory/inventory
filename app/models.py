@@ -68,6 +68,7 @@ class ProductInformation(db.Model):
         Saves an ProductInformation to database,
         currently no duplicate detection is supported.
         """
+        ProductInformation.logger.info("Save/update for id {}.".format(self.prod_id))
         if self.restock_level is not None and self.restock_level > 0:
             self.automatic_restock()
 
@@ -78,6 +79,7 @@ class ProductInformation(db.Model):
         """
         Delete an ProductInformation from database.
         """
+        ProductInformation.logger.info("Delete for id {}.".format(self.prod_id))
         db.session.delete(self)
         db.session.commit()
 
@@ -155,6 +157,7 @@ class ProductInformation(db.Model):
         Add 'amt' of products to this ProductInfo's new_qty.
         Created for manual restock action.
         """
+        ProductInformation.logger.info("Restock id {} with amount {}.".format(self.prod_id, amt))
         if self.new_qty is None:
             raise DataValidationError(BAD_DATA_MSG)
         self.new_qty += amt
@@ -231,6 +234,7 @@ class ProductInformation(db.Model):
     @staticmethod
     def find(prod_id):
         """ Find an ProductInformation by the prod_id """
+        ProductInformation.logger.info("Look for id {}.".format(prod_id))
         return ProductInformation.query.get(prod_id)
 
     @staticmethod
@@ -240,6 +244,7 @@ class ProductInformation(db.Model):
         Args:
             name (string): the name of the inventory you want to match
         """
+        ProductInformation.logger.info("Look for name {}.".format(name))
         return ProductInformation.query.filter(ProductInformation.prod_name == name).all()
 
     @staticmethod
@@ -249,6 +254,7 @@ class ProductInformation(db.Model):
         Args:
             quantity (int): the quantity of the inventory you want to match
         """
+        ProductInformation.logger.info("Look for product with quantity {}.".format(quantity))
         return ProductInformation.query.filter(
             ProductInformation.new_qty + ProductInformation.used_qty
             + ProductInformation.open_boxed_qty == quantity).all()
@@ -260,6 +266,7 @@ class ProductInformation(db.Model):
         Args:
             condition (string): the condition of the inventory you want to match
         """
+        ProductInformation.logger.info("Look for product of condition {}.".format(condition))
         if condition == "new":
             return ProductInformation.query.filter(ProductInformation.new_qty > 0).all()
         elif condition == "used":
@@ -272,4 +279,5 @@ class ProductInformation(db.Model):
     @staticmethod
     def list_all():
         """ Returns all ProductInformation in the database """
+        ProductInformation.logger.info("List all products.")
         return ProductInformation.query.all()
