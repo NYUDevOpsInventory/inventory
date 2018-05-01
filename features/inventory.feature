@@ -67,3 +67,10 @@ Scenario: Query a product by Condition Open-boxed
     And I set the "searchValue" to "open-boxed"
     And I press the "search" Button
     Then I should see the message "Success"
+
+Scenario: Restock action
+    When I visit the "Home Page"
+    And I set the "prod_id" to "1"
+    And I set the "restock_amt" to "3"
+    And I press the "restock" Button
+    Then I should see the message "Product 1 restocks successfully"
