@@ -72,6 +72,18 @@ def not_found(error):
 ######################################################################
 @app.route('/')
 def index():
+    """
+    Returns the homepage of the Inventory Management System
+    This endpoint returns the homepage of the Inventory Management System in html format.
+    ---
+    tags:
+      -     Inventory
+    produces:
+      -     application/json
+    responses:
+        200:
+            description: the homepage is successfully returned.
+    """
     return app.send_static_file('index.html')
 
 @app.route('/inventory', methods=[GET])
@@ -178,14 +190,14 @@ def create_prod_info():
                     - prod_id
                     - prod_name
                 $ref: '#/definitions/Product'
-                
+
     responses:
         201:
             description: Product information created
             schema:
                 $ref: '#/definitions/Product'
         400:
-            description: Bad Request (invalid posted data)        
+            description: Bad Request (invalid posted data)
     """
     check_content_type(JSON)
     prod_info = ProductInformation()
@@ -216,7 +228,7 @@ def delete_prod_info(prod_id):
             name: prod_id
             type: integer
             required: true
-            description: prod_id of the product information to be deleted.                
+            description: prod_id of the product information to be deleted.
     responses:
         200:
             description: Product information deleted.
