@@ -76,7 +76,45 @@ def index():
 
 @app.route('/inventory', methods=[GET])
 def query_prod_info():
-    """ Query specific entries in the Inventory system """
+    """
+    Retrieve a list of all the products in the inventory & query specific entries in the Inventory system
+    This endpoint will return all the details of the products in the inventory unless a query parameter is specificed
+    ---
+    tags:
+      -     Inventory
+    description: The inventory endpoint allows you to query the inventory
+    parameters:
+      -     name: prod_name
+            in: query
+            description: the name of the product you are looking for
+            required: false
+            type: string
+      -     name: quantity
+            in: query
+            description: if you want to check how many products have a specfic quantity
+            required: false
+            type: integer
+      -     name: condition
+            in: query
+            description: if you want to find all the products of a certain condition (e.g. new, used, open_boxed)
+            required: false
+            type: string
+            enum:
+                - new
+                - used
+                - open_boxed
+
+    responses:
+      400:
+          description: Bad Request (invalid posted data)
+      200:
+          description: An array of all the products
+          schema:
+            type: array
+            items:
+              schema:
+                $ref: '#/definitions/Product'
+    """
     if request.args:
         app.logger.info("GET received, List all that satisfy {}.".format(request.args.to_dict()))
     else:
@@ -184,14 +222,14 @@ def create_prod_info():
                     - prod_id
                     - prod_name
                 $ref: '#/definitions/Product'
-                
+
     responses:
         201:
             description: Product information created
             schema:
                 $ref: '#/definitions/Product'
         400:
-            description: Bad Request (invalid posted data)        
+            description: Bad Request (invalid posted data)
     """
     check_content_type(JSON)
     app.logger.info("POST received, create with payload {}.".format(request.get_json()))
@@ -223,7 +261,7 @@ def delete_prod_info(prod_id):
             name: prod_id
             type: integer
             required: true
-            description: prod_id of the product information to be deleted.                
+            description: prod_id of the product information to be deleted.
     responses:
         200:
             description: Product information deleted.
@@ -286,6 +324,36 @@ def restock_action(prod_id):
     Restock new quantity.
 
     This endpoint will update the number of new_qty of the given prod_id.
+    ---
+    tags:
+        -   Inventory
+    consumes:
+        -   application/json
+    definitions:
+        Restock_Amount:
+            type: object
+            properties:
+                restock_amt:
+                    type: integer
+                    minimum: 0
+                    description: Amount to be added to the product's new_amt field. 
+    parameters:
+        -   name: prod_id
+            in: path
+            description: ID of product.
+            type: integer
+            required: true
+        -   in: body
+            name: body
+            required: true
+            schema:
+                id: data
+                $ref: '#/definitions/Restock_Amount'
+    responses:
+        200:
+            description: Product restocked successfully.
+        400:
+            description: Bad Request (invalid input data)
     """
     check_content_type(JSON)
     app.logger.info("PUT received, restock id {} with {}.".format(prod_id, request.get_json()))
