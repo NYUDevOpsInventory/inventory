@@ -32,3 +32,11 @@ Scenario: Create a new ProductInformation
     And I set the "prod_name" to "StormTrooper"
     And I press the "create" Button
     Then I should see the message "Success"
+
+Scenario: Restock action
+    When I visit the "Home Page"
+    And I set the "prod_id" to "1"
+    And I set the "restock_amt" to "3"
+    And I press the "restock" Button
+    Then I should see the message "Product 1 restocks successfully"
+
