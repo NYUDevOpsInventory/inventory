@@ -39,3 +39,31 @@ Scenario: Query a product by Name
     And I set the "searchValue" to "iPhone"
     And I press the "search" Button
     Then I should see the message "Success"
+
+Scenario: Query a product by Quantity
+    When I visit the "Home Page"
+    And I select "quantity" for "searchKey"
+    And I set the "searchValue" to "6"
+    And I press the "search" Button
+    Then I should see the message "Success"
+
+Scenario: Query a product by Condition New
+    When I visit the "Home Page"
+    And I select "condition" for "searchKey"
+    And I set the "searchValue" to "new"
+    And I press the "search" Button
+    Then I should see the message "Success"
+
+Scenario: Query a product by Condition Used
+    When I visit the "Home Page"
+    And I select "condition" for "searchKey"
+    And I set the "searchValue" to "used"
+    And I press the "search" Button
+    Then I should see the message "Success"
+
+Scenario: Query a product by Condition Open-boxed
+    When I visit the "Home Page"
+    And I select "condition" for "searchKey"
+    And I set the "searchValue" to "open-boxed"
+    And I press the "search" Button
+    Then I should see the message "Success"
