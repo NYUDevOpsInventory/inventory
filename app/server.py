@@ -96,9 +96,13 @@ def query_prod_info():
             type: integer
       -     name: condition
             in: query
-            description: if you want to find all the products of a certain condition
+            description: if you want to find all the products of a certain condition (e.g. new, used, open_boxed)
             required: false
             type: string
+            enum:
+                - new
+                - used
+                - open_boxed
 
     responses:
       400:
