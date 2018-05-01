@@ -115,6 +115,10 @@ def query_prod_info():
               schema:
                 $ref: '#/definitions/Product'
     """
+    if request.args:
+        app.logger.info("GET received, List all that satisfy {}.".format(request.args.to_dict()))
+    else:
+        app.logger.info("GET received, List all.")
 
     all_prod_info = []
     if request.args.get('prod_name'):
@@ -164,6 +168,7 @@ def get_prod_info(prod_id):
         404:
             description: Inventory entry not found
     """
+    app.logger.info("GET received, retrieve id {}.".format(prod_id))
     prod_info = ProductInformation.find(prod_id)
     if not prod_info:
         raise NotFound(NOT_FOUND_MSG.format(prod_id))
@@ -227,6 +232,7 @@ def create_prod_info():
             description: Bad Request (invalid posted data)
     """
     check_content_type(JSON)
+    app.logger.info("POST received, create with payload {}.".format(request.get_json()))
     prod_info = ProductInformation()
     prod_info.deserialize(request.get_json())
 
@@ -260,6 +266,7 @@ def delete_prod_info(prod_id):
         200:
             description: Product information deleted.
     """
+    app.logger.info("DELETE received, delete id {}.".format(prod_id))
     prod_info = ProductInformation.find(prod_id)
     if prod_info:
         prod_info.delete()
@@ -298,6 +305,7 @@ def update_prod_info(prod_id):
             description: Bad Request (the posted data was not valid)
     """
     check_content_type(JSON)
+    app.logger.info("PUT received, update id {} with payload {}.".format(prod_id, request.get_json()))
     prod_info = ProductInformation.find(prod_id)
     if not prod_info:
         raise NotFound(NOT_FOUND_MSG.format(prod_id))
@@ -348,6 +356,7 @@ def restock_action(prod_id):
             description: Bad Request (invalid input data)
     """
     check_content_type(JSON)
+    app.logger.info("PUT received, restock id {} with {}.".format(prod_id, request.get_json()))
     prod_info = ProductInformation.find(prod_id)
     if not prod_info:
         raise NotFound(NOT_FOUND_MSG.format(prod_id))
