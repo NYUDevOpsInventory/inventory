@@ -316,6 +316,36 @@ def restock_action(prod_id):
     Restock new quantity.
 
     This endpoint will update the number of new_qty of the given prod_id.
+    ---
+    tags:
+        -   Inventory
+    consumes:
+        -   application/json
+    definitions:
+        Restock_Amount:
+            type: object
+            properties:
+                restock_amt:
+                    type: integer
+                    minimum: 0
+                    description: Amount to be added to the product's new_amt field. 
+    parameters:
+        -   name: prod_id
+            in: path
+            description: ID of product.
+            type: integer
+            required: true
+        -   in: body
+            name: body
+            required: true
+            schema:
+                id: data
+                $ref: '#/definitions/Restock_Amount'
+    responses:
+        200:
+            description: Product restocked successfully.
+        400:
+            description: Bad Request (invalid input data)
     """
     check_content_type(JSON)
     prod_info = ProductInformation.find(prod_id)
