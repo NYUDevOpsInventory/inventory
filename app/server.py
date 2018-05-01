@@ -78,7 +78,7 @@ def index():
 def query_prod_info():
     """ Query specific entries in the Inventory system """
     if request.args:
-        app.logger.info("GET received, List all that satisfies {}.".format(request.args.to_dict()))
+        app.logger.info("GET received, List all that satisfy {}.".format(request.args.to_dict()))
     else:
         app.logger.info("GET received, List all.")
 
