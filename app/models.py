@@ -1,7 +1,7 @@
 """
 Models for Inventory Management Service
 
-All of the models are stored in this module
+All of the models are stored in this models.py file.
 
 Models
 ------
