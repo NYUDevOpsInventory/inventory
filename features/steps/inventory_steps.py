@@ -84,3 +84,13 @@ def step_impl(context, message):
         )
     )
     expect(found).to_be(True)
+
+@then(u'I should see "{name}" in the results')
+def step_impl(context, name):
+    found = WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.text_to_be_present_in_element(
+            (By.ID, 'search_results'),
+            name
+        )
+    )
+    expect(found).to_be(True)

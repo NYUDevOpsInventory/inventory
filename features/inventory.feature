@@ -74,3 +74,10 @@ Scenario: Restock action
     And I set the "restock_amt" to "3"
     And I press the "restock" Button
     Then I should see the message "Product 1 restocks successfully"
+
+Scenario: List all the products
+    When I visit the "Home Page"
+    And I press the "list" Button
+    Then I should see "iPod" in the results
+    And I should see "Macbook" in the results
+    And I should see "iPhone" in the results
