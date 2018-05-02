@@ -74,3 +74,26 @@ Scenario: Restock action
     And I set the "restock_amt" to "3"
     And I press the "restock" Button
     Then I should see the message "Product 1 restocks successfully"
+
+Scenario: List all the products
+    When I visit the "Home Page"
+    And I press the "list" Button
+    Then I should see "iPod" in the results
+    And I should see "Macbook" in the results
+    And I should see "iPhone" in the results
+
+Scenario: Update a the name of the product
+    When I visit the "Home Page"
+    And I set the "prod_id" to "1"
+    And I press the "retrieve" Button
+    Then I should see "iPod" in the "prod_name" field
+    When I change "prod_name" to "Notebook"
+    And I press the "update" Button
+    Then I should see the message "Success"
+    When I set the "prod_id" to "1"
+    And I press the "retrieve" Button
+    Then I should see "Notebook" in the "prod_name" field
+    When I press the "clear" Button
+    And I press the "list" Button
+    Then I should see "Notebook" in the results
+    Then I should not see "iPod" in the results

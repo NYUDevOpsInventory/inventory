@@ -6,7 +6,7 @@ Steps file for inventory.feature.
 from os import getenv
 import json
 import requests
-from compare import expect
+from compare import expect, ensure
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions
@@ -84,3 +84,27 @@ def step_impl(context, message):
         )
     )
     expect(found).to_be(True)
+
+@then(u'I should see "{name}" in the results')
+def step_impl(context, name):
+    found = WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.text_to_be_present_in_element(
+            (By.ID, 'search_results'),
+            name
+        )
+    )
+    expect(found).to_be(True)
+
+@then(u'I should not see "{name}" in the results')
+def step_impl(context, name):
+    element = context.driver.find_element_by_id('search_results')
+    error_msg = "I should not see '%s' in '%s'" % (name, element.text)
+    ensure(name in element.text, False, error_msg)
+
+@when(u'I change "{element_id}" to "{text_string}"')
+def step_impl(context, element_id, text_string):
+    element = WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.presence_of_element_located((By.ID, element_id))
+    )
+    element.clear()
+    element.send_keys(text_string)
